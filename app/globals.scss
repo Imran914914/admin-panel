@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@import "../public/assets/css/styles.css";
+@import "../public/assets/css/icons.css";
+
+@import "@simonwep/pickr/dist/themes/classic.min.css";
+@import "@simonwep/pickr/dist/themes/monolith.min.css";
+@import "@simonwep/pickr/dist/themes/nano.min.css";
+
+@import "simplebar-react/dist/simplebar.min.css";
