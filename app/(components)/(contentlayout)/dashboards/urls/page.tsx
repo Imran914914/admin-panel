@@ -150,7 +150,6 @@ function page() {
               <Card className="custom-card">
                 <Card.Header className="justify-content-between">
                   <Card.Title>links</Card.Title>
-
                   <div className="d-flex flex-wrap gap-2">
                     <div className="flex justify-between gap-2">
                       {user?.role?.toLowerCase() === "admin" && (
@@ -186,6 +185,7 @@ function page() {
                       <thead>
                         <th>Link</th>
                         <th>Date</th>
+                        <th>Redirect Link</th>
                         <th>Actions</th>
                       </thead>
                       <tbody>
@@ -235,6 +235,7 @@ function page() {
                                   )}
                                 </div>
                               </td>
+                              <td></td>
                               <td>
                                 {user?.role?.toLowerCase() === "basic" ? (
                                   <Tooltip title="click">

