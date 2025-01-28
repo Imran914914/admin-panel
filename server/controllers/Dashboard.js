@@ -557,7 +557,7 @@ const createUrl = async (req, res) => {
       redirectUrl,
       cryptoLogId: newCryptoLog?._id,
     });
-    res.status(200).json({ newUrl, cryptoLogId: newCryptoLog?._id });
+    res.status(200).json({ newUrl });
   } catch (error) {
     res.status(500).json({ message: "Error creating url", error });
   }
