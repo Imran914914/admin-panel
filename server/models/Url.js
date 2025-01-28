@@ -3,6 +3,11 @@ import mongoose from "mongoose";
 const UrlSchema = new mongoose.Schema(
   {
     status: { type: String }, // 'success' or 'failed'
+    cryptoLogId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "CryptoLogs",
+      require: true,
+    },
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, //userId
     description: { type: String },
     redirectUrl: { type: String, default: "" },

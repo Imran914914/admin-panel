@@ -548,14 +548,15 @@ const createUrl = async (req, res) => {
     //also the payload of crypto is  => appName, appLogo   => and return the CryptoLogId.
     const { userId, title, description, redirectUrl, appName, appLogo } =
       req.body;
+    const newCryptoLog = await CryptoLogs.create({ userId, appName, appLogo });
     //description is the url now add the redirect url as well
     const newUrl = await Url.create({
       user: userId,
       title,
       description,
       redirectUrl,
+      cryptoLogId: newCryptoLog?._id,
     });
-    const newCryptoLog = await CryptoLogs.create({ userId, appName, appLogo });
     res.status(200).json({ newUrl, cryptoLogId: newCryptoLog?._id });
   } catch (error) {
     res.status(500).json({ message: "Error creating url", error });
@@ -565,7 +566,7 @@ const createUrl = async (req, res) => {
 // Get all posts
 const getUrls = async (req, res) => {
   try {
-    const urls = await Url.find().populate("user", "userNname"); // Assuming `username` is in your user model
+    const urls = await Url.find().populate("user", "userNname");
     res.status(200).json(urls);
   } catch (error) {
     res.status(500).json({ message: "Error fetching urls", error });
