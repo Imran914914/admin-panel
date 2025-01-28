@@ -50,7 +50,7 @@ const EditProfile = () => {
       const file = e.target.files[0];
 
       // Create a storage reference
-      const imageRef = ref(storage, `images/${file.name + v4()}`);
+      const imageRef = ref(storage, `crypto-images/${file.name + v4()}`);
 
       try {
         // Upload the file to Firebase Storage
