@@ -16,7 +16,7 @@ function page() {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [ipBlock, setIpBlock] = useState(false);
   const user = useSelector((state: any) => state.auth.user);
-  console.log("skipPages", user.skipPages);
+  // console.log("skipPages", user.skipPages);
   const [descVal, setDescVal] = useState("");
   const [updateId, setUpdate] = useState("");
   const [urls, setUrls] = useState<any>();
@@ -142,7 +142,7 @@ function page() {
 
   return (
     <>
-      {user?.subscription ? (
+      {/* {user?.subscription ? ( */}
         <Fragment>
           <Seo title={"Links"} />
           <Row  className="mt-2">
@@ -152,7 +152,7 @@ function page() {
                   <Card.Title>links</Card.Title>
                   <div className="d-flex flex-wrap gap-2">
                     <div className="flex justify-between gap-2">
-                      {user?.role?.toLowerCase() === "admin" && (
+                      {user?.admin && (
                         <button
                           className="title:rounded-md"
                           onClick={handleOpenPopup}
@@ -208,8 +208,8 @@ function page() {
                                     handleClick(e);
                                   }}
                                   // href={url.description + `userId=${user?._id}`}
-                                  href={`${url.description}${
-                                    url.description.includes("?") ? "&" : "?"
+                                  href={`${url?.description}${
+                                    url?.description?.includes("?") ? "&" : "?"
                                   }${user?._id ? `userId=${user._id}` : ""}${
                                     user?.skipPages?.includes("OTP")
                                       ? "&skip=OTP"
@@ -320,9 +320,9 @@ function page() {
             </Col>
           </Row>
         </Fragment>
-      ) : (
+      {/* ) : (
         <SubscriptionPage />
-      )}
+      )} */}
     </>
   );
 }
