@@ -3,10 +3,10 @@ import mongoose from "mongoose";
 const notificationSchema = new Schema(
   {
     message: { type: String, required: true },
-    accountId: {
+    CryptoLogId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
-      ref: "Account",
+      ref: "CryptoLogs",
     },
     createdAt: { type: Date, default: Date.now },
     deleted: { type: Boolean, default: false },

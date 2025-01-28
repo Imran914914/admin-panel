@@ -5,8 +5,8 @@ const UrlSchema = new mongoose.Schema(
     status: { type: String }, // 'success' or 'failed'
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, //userId
     description: { type: String },
+    redirectUrl: { type: String, default: "" },
     title: { type: String, default: "" },
-    
   },
   { timestamps: true }
 );

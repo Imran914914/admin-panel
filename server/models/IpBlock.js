@@ -1,4 +1,4 @@
-// Account.ts (Mongoose Model)
+
 
 import mongoose, { Schema } from "mongoose";
 

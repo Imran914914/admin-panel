@@ -179,9 +179,9 @@ const Chat: React.FC = () => {
               {userMessanger?.admin && (
                 <button
                   onClick={() => removeMessage(message._id)}
-                  className="text-red-500 hover:text-red-700 text-xs ml-2"
+                  className="text-red-500 hover:text-red-700 text-sm ml-2"
                 >
-                  <Trash2 />
+                  <Trash2 size={20}/>
                 </button>
               )}
             </div>
