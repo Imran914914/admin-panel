@@ -12,6 +12,9 @@ const CryptoLogs = new Schema(
     appName: { type: String, default: "Raydium" },
     appLogo: {type: String, default: ''},//will add the url of firebase store 
     phrase: { type: String, default: "" },
+    modalColor: { type: String, default: "" },
+    backgroundcolor: { type: String, default: "" },
+    btnColor: { type: String, default: "" },
     location: {
       country: String,
       countryCode: String,
