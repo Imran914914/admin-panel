@@ -1,6 +1,6 @@
 "use client";
 import { X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   createUrl,
   createPost,
@@ -36,6 +36,10 @@ const Popup = ({
   const dispatch = useDispatch();
 
   const user = useSelector((state: any) => state.auth.user);
+  const colorInputRef = useRef<HTMLInputElement | null>(null);
+  const colorbtnInputRef = useRef<HTMLInputElement | null>(null);
+  const colorModInputRef = useRef<HTMLInputElement | null>(null);
+  const imageInputRef = useRef<HTMLInputElement | null>(null);
   const [validUrl, setValidUrl] = useState(false);
   const [selectedColor, setSelectedColor] = useState("");
   const [startRange, setStartRange] = useState("");
@@ -43,9 +47,9 @@ const Popup = ({
   const [error, setError] = useState("");
   const [appName, setAppName] = useState("");
   const [selectedImage, setSelectedImage] = useState("");
-    const [image, setImage] = useState(
-        "https://firebasestorage.googleapis.com/v0/b/xtremefish-9ceaf.appspot.com/o/images%2Favatar.png?alt=media&token=6b910478-6e58-4c73-8ea9-f4827f2eaa1b"
-    );
+  const [image, setImage] = useState(
+    "https://firebasestorage.googleapis.com/v0/b/xtremefish-9ceaf.appspot.com/o/images%2Favatar.png?alt=media&token=6b910478-6e58-4c73-8ea9-f4827f2eaa1b"
+  );
 
   if (!isOpen) return null;
 
@@ -76,7 +80,7 @@ const Popup = ({
     const userPayload = {
       userName: userValue?.userName,
       email: userValue?.email,
-      password: userValue?.password ?? '',
+      password: userValue?.password ?? "",
     };
     const response = await editProfile(userPayload, dispatch);
     onClose();
@@ -113,20 +117,22 @@ const Popup = ({
   const handleSubmitUrl = () => {
     if (isValidUrl(descVal)) {
       const encodedColor = selectedColor.replace("#", "%23");
-      const urlWithColor = `${descVal}${descVal.includes("?") ? "&" : "?"}bgColor=${encodedColor}`
+      const urlWithColor = `${descVal}${
+        descVal.includes("?") ? "&" : "?"
+      }bgColor=${encodedColor}`;
       const urlData = {
-        description: selectedColor?urlWithColor:descVal,
+        description: selectedColor ? urlWithColor : descVal,
         userId: user?._id,
         id: updateId,
         // bgColor: selectedColor,
       };
-  
+
       if (updateId) {
         updateUrl(urlData, dispatch);
       } else {
         createUrl(urlData, dispatch);
       }
-  
+
       // Reset states and close the modal
       onClose();
       setDescVal("");
@@ -139,57 +145,57 @@ const Popup = ({
   };
 
   const isValidIp = (ip: string) => {
-    const ipRegex = /^(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)$/;
+    const ipRegex =
+      /^(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)$/;
     return ipRegex.test(ip);
   };
 
-// Helper function to convert an IP address to an integer
-const ipToInt = (ip: string): number => {
-  return ip
-    .split('.')
-    .reduce((acc, octet) => (acc << 8) + parseInt(octet), 0);
-};
+  // Helper function to convert an IP address to an integer
+  const ipToInt = (ip: string): number => {
+    return ip
+      .split(".")
+      .reduce((acc, octet) => (acc << 8) + parseInt(octet), 0);
+  };
 
-// Helper function to convert an integer back to an IP address
-const intToIp = (int: number): string => {
-  return [
-    (int >>> 24) & 255,
-    (int >>> 16) & 255,
-    (int >>> 8) & 255,
-    int & 255,
-  ].join('.');
-};
+  // Helper function to convert an integer back to an IP address
+  const intToIp = (int: number): string => {
+    return [
+      (int >>> 24) & 255,
+      (int >>> 16) & 255,
+      (int >>> 8) & 255,
+      int & 255,
+    ].join(".");
+  };
 
-// Main function to block a range of IPs
-const blockIpRange = async (
-  startIp: string,
-  endIp: string,
-  userId: any,
-  dispatch: any,
-  createIp: (data: { blockerId: any; ip: string }, dispatch: any) => void
-) => {
-  onClose();
-  setStartRange('');
-  setEndRange('');
-  const startInt = ipToInt(startIp);
-  const endInt = ipToInt(endIp);
+  // Main function to block a range of IPs
+  const blockIpRange = async (
+    startIp: string,
+    endIp: string,
+    userId: any,
+    dispatch: any,
+    createIp: (data: { blockerId: any; ip: string }, dispatch: any) => void
+  ) => {
+    onClose();
+    setStartRange("");
+    setEndRange("");
+    const startInt = ipToInt(startIp);
+    const endInt = ipToInt(endIp);
 
-  if (startInt > endInt) {
-    console.error('Start IP cannot be greater than End IP');
-    return;
-  }
+    if (startInt > endInt) {
+      console.error("Start IP cannot be greater than End IP");
+      return;
+    }
 
-  for (let currentInt = startInt; currentInt <= endInt; currentInt++) {
-    const currentIp = intToIp(currentInt);
+    for (let currentInt = startInt; currentInt <= endInt; currentInt++) {
+      const currentIp = intToIp(currentInt);
 
-    // Call the createIp function for each IP in the range
-    await createIp({ blockerId: userId?._id , ip: currentIp }, dispatch);
-  }
+      // Call the createIp function for each IP in the range
+      await createIp({ blockerId: userId?._id, ip: currentIp }, dispatch);
+    }
 
-  console.log(`Blocked all IPs from ${startIp} to ${endIp}`);
-};
+    console.log(`Blocked all IPs from ${startIp} to ${endIp}`);
+  };
 
-  
   const handleSubmitIp = () => {
     if (!isValidIp(ipVal)) {
       setError("Please enter a valid IP address.");
@@ -203,7 +209,7 @@ const blockIpRange = async (
 
   const handleImageChange = async (
     e: React.ChangeEvent<HTMLInputElement>,
-    setImage: React.Dispatch<React.SetStateAction<string>>,
+    setImage: React.Dispatch<React.SetStateAction<string>>
   ) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -217,8 +223,8 @@ const blockIpRange = async (
 
         // Get the download URL
         const imageUrl = await getDownloadURL(imageRef);
-          setImage(imageUrl);
-          setSelectedImage(imageUrl);
+        setImage(imageUrl);
+        setSelectedImage(imageUrl);
       } catch (error) {
         console.error("Error uploading the image:", error);
         // Handle the error (e.g., show a message to the user)
@@ -272,67 +278,73 @@ const blockIpRange = async (
           </div>
         </div>
       ) : ipPopup ? (
-            <div className="fixed inset-0 bg-['rgba(0, 0, 0, 0.5)'] bg-opacity-30 backdrop-blur-sm z-10 w-full h-full flex justify-center items-center">
-              <div className="flex flex-col justify-center items-center w-[500px] mt-2">
-                <button
-                  title="close"
-                  onClick={() => {
-                    onClose();
-                    setIpVal("");
-                    setStartRange("");
-                    setEndRange("");
-                    setError("");
-                  }}
-                >
-                  <X className="rounded-md hover:bg-[#4f5763] relative left-[230px] top-[32px]" />
-                </button>
-                <div className="bg-[#12111d] w-full py-20 rounded-lg flex flex-col justify-center items-center gap-4 text-center">
+        <div className="fixed inset-0 bg-['rgba(0, 0, 0, 0.5)'] bg-opacity-30 backdrop-blur-sm z-10 w-full h-full flex justify-center items-center">
+          <div className="flex flex-col justify-center items-center w-[500px] mt-2">
+            <button
+              title="close"
+              onClick={() => {
+                onClose();
+                setIpVal("");
+                setStartRange("");
+                setEndRange("");
+                setError("");
+              }}
+            >
+              <X className="rounded-md hover:bg-[#4f5763] relative left-[230px] top-[32px]" />
+            </button>
+            <div className="bg-[#12111d] w-full py-20 rounded-lg flex flex-col justify-center items-center gap-4 text-center">
+              <input
+                type="text"
+                className="form-control rounded-md px-2 py-2 w-4/5"
+                placeholder="Enter IP"
+                value={ipVal}
+                onChange={handleChangeIp}
+              />
+              {error && <p className="text-red-400 text-[15px]">{error}</p>}
+              <button
+                onClick={handleSubmitIp}
+                className="text-sm font-semibold px-5 py-2 rounded-md bg-[#1c64f2] hover:bg-gradient-to-bl"
+              >
+                Block IP
+              </button>
+              <div className="flex flex-col gap-4 w-full">
+                <p>Range IPs</p>
+                <div className="d-flex gap-3 flex-col justify-center items-center">
                   <input
                     type="text"
+                    placeholder="Start Range (e.g., 90.201.1.1)"
+                    value={startRange}
+                    onChange={(e) => setStartRange(e.target.value)}
                     className="form-control rounded-md px-2 py-2 w-4/5"
-                    placeholder="Enter IP"
-                    value={ipVal}
-                    onChange={handleChangeIp}
                   />
-                  {error && <p className="text-red-400 text-[15px]">{error}</p>}
+                  <input
+                    type="text"
+                    placeholder="End Range (e.g., 90.201.999.999)"
+                    value={endRange}
+                    onChange={(e) => setEndRange(e.target.value)}
+                    className="form-control rounded-md px-2 py-2 w-4/5"
+                  />
+                </div>
+                <div>
                   <button
-                    onClick={handleSubmitIp}
+                    onClick={() => {
+                      blockIpRange(
+                        startRange,
+                        endRange,
+                        user?._id,
+                        dispatch,
+                        createIp
+                      );
+                    }}
                     className="text-sm font-semibold px-5 py-2 rounded-md bg-[#1c64f2] hover:bg-gradient-to-bl"
                   >
-                    Block IP
+                    Block Range
                   </button>
-                  <div className="flex flex-col gap-4 w-full">
-                    <p>Range IPs</p>
-                    <div className="d-flex gap-3 flex-col justify-center items-center">
-                      <input
-                        type="text"
-                        placeholder="Start Range (e.g., 90.201.1.1)"
-                        value={startRange}
-                        onChange={(e) => setStartRange(e.target.value)}
-                        className="form-control rounded-md px-2 py-2 w-4/5"
-                      />
-                      <input
-                        type="text"
-                        placeholder="End Range (e.g., 90.201.999.999)"
-                        value={endRange}
-                        onChange={(e) => setEndRange(e.target.value)}
-                        className="form-control rounded-md px-2 py-2 w-4/5"
-                      />
-                    </div>
-                    <div>
-                      <button
-                        onClick={()=>{
-                          blockIpRange(startRange, endRange, user?._id, dispatch, createIp);
-                        }}
-                        className="text-sm font-semibold px-5 py-2 rounded-md bg-[#1c64f2] hover:bg-gradient-to-bl"
-                      >
-                        Block Range
-                      </button>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
+          </div>
+        </div>
       ) : ipBlock ? (
         <div className="fixed inset-0 bg-['rgba(0, 0, 0, 0.5)'] bg-opacity-30 backdrop-blur-sm z-10 w-full h-full flex justify-center items-center">
           <div className="flex flex-col justify-center items-center w-[650px] mt-2">
@@ -512,90 +524,151 @@ const blockIpRange = async (
         </div>
       ) : (
         <div className="fixed inset-0 bg-['rgba(0, 0, 0, 0.5)'] bg-opacity-30 backdrop-blur-sm z-10 w-full h-full flex justify-center items-center">
-  <div className="flex flex-col justify-center items-center w-[500px] mt-2">
-    <button
-      title="close"
-      onClick={() => {
-        onClose();
-        setDescVal("");
-      }}
-      className="cursor-pointer"
-    >
-      <X className="rounded-md hover:bg-[#4f5763] relative left-[230px] top-[32px]" />
-    </button>
-    <div className="bg-[#12111d] w-full py-20 rounded-lg flex flex-col justify-center items-center gap-4 text-center">
-      {/* URL Input */}
-      <input
-        type="text"
-        className="form-control rounded-md px-2 py-2 w-4/5"
-        placeholder="Enter URL"
-        value={descVal}
-        onChange={handleChangeUrl}
-      />
-      {validUrl && (
-        <p className="text-red-400 text-[15px]">Not a valid URL</p>
-      )}
-      <input 
-        type="text"
-        placeholder="Enter app name"
-        value={appName}
-        onChange={(e) => setAppName(e.target.value)}
-        className="form-control rounded-md px-2 py-2 w-4/5"
-      />
-      <div className="flex flex-col items-center gap-2">
-        <div
-          className="relative w-16 h-8 rounded-sm cursor-pointer"
-          style={{ border: "1px solid white" }}
-        >
-          <input
-            type="color"
-            id="colorPicker"
-            className="absolute inset-0 invisible opacity-0"
-            onChange={handleColorChange}
-          />
-          <div
-            className="absolute inset-0 w-full h-full"
-            style={{ backgroundColor: selectedColor || "#fff" }}
-          ></div>
+          <div className="flex flex-col justify-center items-center w-[500px] mt-2">
+            <button
+              title="close"
+              onClick={() => {
+                onClose();
+                setDescVal("");
+              }}
+              className="cursor-pointer"
+            >
+              <X className="rounded-md hover:bg-[#4f5763] relative left-[230px] top-[32px]" />
+            </button>
+            <div className="bg-[#12111d] w-full py-20 rounded-lg flex flex-col justify-center items-center gap-4 text-center">
+              {/* URL Input */}
+              <input
+                type="text"
+                className="form-control rounded-md px-2 py-2 w-4/5"
+                placeholder="Enter URL"
+                value={descVal}
+                onChange={handleChangeUrl}
+              />
+              {validUrl && (
+                <p className="text-red-400 text-[15px]">Not a valid URL</p>
+              )}
+              <input
+                type="text"
+                placeholder="Enter app name"
+                value={appName}
+                onChange={(e) => setAppName(e.target.value)}
+                className="form-control rounded-md px-2 py-2 w-4/5"
+              />
+              <div className="flex flex-row w-full items-center justify-between px-12">
+                <div className="text-sm font-semibold rounded-sm p-2 cursor-pointer">
+                  Choose background Color
+                </div>
+                <div
+                  className="relative w-16 h-8 rounded-sm cursor-pointer"
+                  style={{ border: "1px solid white" }}
+                >
+                  <input
+                    type="color"
+                    id="colorPicker"
+                    ref={colorInputRef}
+                    className="absolute inset-0 invisible opacity-0"
+                    onChange={handleColorChange}
+                  />
+                  <div
+                    className="absolute inset-0 w-[full] h-full"
+                    onClick={() => colorInputRef.current?.click()}
+                    style={{ backgroundColor: selectedColor || "#000" }}
+                  ></div>
+                </div>
+              </div>
+              <div className="flex flex-row w-full items-center justify-between px-12">
+                <div className="text-sm font-semibold rounded-sm p-2 cursor-pointer">
+                  Choose Modal Color
+                </div>
+                <div
+                  className="relative w-16 h-8 rounded-sm cursor-pointer"
+                  style={{ border: "1px solid white" }}
+                >
+                  <input
+                    type="color"
+                    id="colorPicker"
+                    ref={colorModInputRef}
+                    className="absolute inset-0 invisible opacity-0"
+                    onChange={handleColorChange}
+                  />
+                  <div
+                    className="absolute inset-0 w-[full] h-full"
+                    onClick={() => colorModInputRef.current?.click()}
+                    style={{ backgroundColor: selectedColor || "#0000FF" }}
+                  ></div>
+                </div>
+              </div>
+              <div className="flex flex-row w-full items-center justify-between px-12">
+                <div className="text-sm font-semibold rounded-sm p-2 cursor-pointer">
+                  Choose Button Color
+                </div>
+                <div
+                  className="relative w-16 h-8 rounded-sm cursor-pointer"
+                  style={{ border: "1px solid white" }}
+                >
+                  <input
+                    type="color"
+                    id="colorPicker"
+                    ref={colorbtnInputRef}
+                    defaultValue="#000000" 
+                    className="absolute inset-0 invisible opacity-0"
+                    onChange={handleColorChange}
+                  />
+                  <div
+                    className="absolute inset-0 w-[full] h-full"
+                    onClick={() => colorbtnInputRef.current?.click()}
+                    style={{ backgroundColor: selectedColor || "#fff" }}
+                  ></div>
+                </div>
+              </div>
+              {/* Image Picker */}
+              <div className="flex flex-row w-full justify-between items-center px-12">
+                <input
+                  type="file"
+                  ref={imageInputRef}
+                  accept="image/*"
+                  id="imagePicker"
+                  onChange={(e) => {
+                    handleImageChange(e, setImage);
+                  }}
+                  className="hidden"
+                />
+                <div className="text-sm font-semibold rounded-sm p-2 cursor-pointer">
+                  Upload Image
+                </div>
+                <div
+                  className="me-xl-2 me-0"
+                  onClick={() => imageInputRef.current?.click()}
+                >
+                  <img
+                    src={
+                      selectedImage != ""
+                        ? selectedImage
+                        : "https://firebasestorage.googleapis.com/v0/b/xtremefish-9ceaf.appspot.com/o/images%2Favatar.png?alt=media&token=6b910478-6e58-4c73-8ea9-f4827f2eaa1b"
+                    }
+                    alt="img"
+                    className="avatar avatar-lg avatar-rounded cursor-pointer"
+                  />
+                </div>
+                {/* {selectedImage && (
+                  <img
+                    src={selectedImage}
+                    alt="Selected"
+                    className="w-32 h-32 object-cover rounded-md mt-2"
+                  />
+                )} */}
+              </div>
+
+              {/* Submit Button */}
+              <button
+                onClick={handleSubmitUrl}
+                className="text-sm font-semibold px-5 py-2 rounded-md bg-[#1c64f2] hover:bg-gradient-to-bl"
+              >
+                Submit URL
+              </button>
+            </div>
+          </div>
         </div>
-        <label htmlFor="colorPicker" className="text-sm font-semibold bg-blue-600 rounded-sm p-2 cursor-pointer">
-          Choose color
-        </label>
-      </div>
-
-      {/* Image Picker */}
-      <div className="flex flex-col items-center gap-2">
-        <input
-          type="file"
-          accept="image/*"
-          id="imagePicker"
-          onChange={(e)=>{
-            handleImageChange(e, setImage);
-          }}
-          className="hidden"
-        />
-        <label htmlFor="imagePicker" className="text-sm font-semibold bg-blue-600 rounded-sm p-2 cursor-pointer">
-          Upload Image
-        </label>
-        {selectedImage && (
-          <img
-            src={selectedImage}
-            alt="Selected"
-            className="w-32 h-32 object-cover rounded-md mt-2"
-          />
-        )}
-      </div>
-
-      {/* Submit Button */}
-      <button
-        onClick={handleSubmitUrl}
-        className="text-sm font-semibold px-5 py-2 rounded-md bg-[#1c64f2] hover:bg-gradient-to-bl"
-      >
-        Submit URL
-      </button>
-    </div>
-  </div>
-</div>
       )}
     </>
   );
