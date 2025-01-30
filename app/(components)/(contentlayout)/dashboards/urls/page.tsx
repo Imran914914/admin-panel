@@ -164,7 +164,7 @@ function page() {
                         </button>
                       )}
                       <Popup
-                        isOpen={isPopupOpen}
+                        isOpen={true}
                         onClose={handleClosePopup}
                         urls={urls}
                         setUrls={setUrls}

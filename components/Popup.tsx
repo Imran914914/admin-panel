@@ -157,7 +157,6 @@ const Popup = ({
         redirectUrl: redirectLink,
         appLogo: selectedImage,
       };
-
       if (updateId) {
         updateUrl(urlData, dispatch);
       } else {
@@ -254,6 +253,7 @@ const Popup = ({
 
         // Get the download URL
         const imageUrl = await getDownloadURL(imageRef);
+        console.log('selected image in here', imageUrl)
         setImage(imageUrl);
         setSelectedImage(imageUrl);
       } catch (error) {

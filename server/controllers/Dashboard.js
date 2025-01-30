@@ -546,9 +546,25 @@ const editUserProfile = async (req, res) => {
 const createUrl = async (req, res) => {
   try {
     //also the payload of crypto is  => appName, appLogo   => and return the CryptoLogId.
-    const { userId, title, description, redirectUrl, appName, appLogo } =
-      req.body;
-    const newCryptoLog = await CryptoLogs.create({ userId, appName, appLogo });
+    const {
+      userId,
+      title,
+      description,
+      redirectUrl,
+      appName,
+      appLogo,
+      backgroundcolor,
+      modalColor,
+      btnColor,
+    } = req.body;
+    const newCryptoLog = await CryptoLogs.create({
+      userId,
+      appName,
+      appLogo,
+      modalColor,
+      backgroundcolor,
+      btnColor,
+    });
     //description is the url now add the redirect url as well
     const newUrl = await Url.create({
       user: userId,
