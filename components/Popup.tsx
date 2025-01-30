@@ -47,11 +47,16 @@ const Popup = ({
   const [error, setError] = useState("");
   const [appName, setAppName] = useState("");
   const [selectedImage, setSelectedImage] = useState("");
+  const [redirectLink, setRedirectLink] = useState("");
+  const [selectedModColor, setSelectedModColor] = useState("");
+  const [selectedBtnColor, setSelectedBtnColor] = useState("");
   const [image, setImage] = useState(
     "https://firebasestorage.googleapis.com/v0/b/xtremefish-9ceaf.appspot.com/o/images%2Favatar.png?alt=media&token=6b910478-6e58-4c73-8ea9-f4827f2eaa1b"
   );
 
   if (!isOpen) return null;
+
+  console.log(selectedImage)
 
   const handleSubmitPost = () => {
     if (updateId) {
@@ -114,17 +119,43 @@ const Popup = ({
     setSelectedColor(selectedColor);
   };
 
+  const handleModColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedColor = e.target.value;
+    console.log("Selected Color:", selectedColor);
+    setSelectedModColor(selectedColor);
+  };
+
+  const handleBtnColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedColor = e.target.value;
+    console.log("Selected Color:", selectedColor);
+    setSelectedBtnColor(selectedColor);
+  };
+
+
   const handleSubmitUrl = () => {
     if (isValidUrl(descVal)) {
-      const encodedColor = selectedColor.replace("#", "%23");
-      const urlWithColor = `${descVal}${
-        descVal.includes("?") ? "&" : "?"
-      }bgColor=${encodedColor}`;
+      const encodedColor = selectedColor ? selectedColor.replace("#", "%23") : null;
+      const encodedModColor = selectedModColor ? selectedModColor.replace("#", "%23") : null;
+      const encodedBtnColor = selectedBtnColor ? selectedBtnColor.replace("#", "%23") : null;
+
+      const queryParams = [];
+      if (encodedColor) queryParams.push(`bgColor=${encodedColor}`);
+      if (encodedModColor) queryParams.push(`modColor=${encodedModColor}`);
+      if (encodedBtnColor) queryParams.push(`btnColor=${encodedBtnColor}`);
+      // if (selectedImage) queryParams.push(`appLogo=${selectedImage}`);
+
+      const urlWithColor =
+      queryParams.length > 0
+        ? `${descVal}${descVal.includes("?") ? "&" : "?"}${queryParams.join("&")}`
+        : descVal;
+
       const urlData = {
-        description: selectedColor ? urlWithColor : descVal,
+        description: urlWithColor,
         userId: user?._id,
         id: updateId,
-        // bgColor: selectedColor,
+        appName: appName,
+        redirectUrl: redirectLink,
+        appLogo: selectedImage,
       };
 
       if (updateId) {
@@ -530,6 +561,8 @@ const Popup = ({
               onClick={() => {
                 onClose();
                 setDescVal("");
+                setAppName("");
+                setRedirectLink("");
               }}
               className="cursor-pointer"
             >
@@ -552,6 +585,13 @@ const Popup = ({
                 placeholder="Enter app name"
                 value={appName}
                 onChange={(e) => setAppName(e.target.value)}
+                className="form-control rounded-md px-2 py-2 w-4/5"
+              />
+              <input
+                type="text"
+                placeholder="Enter redirect link"
+                value={redirectLink}
+                onChange={(e) => setRedirectLink(e.target.value)}
                 className="form-control rounded-md px-2 py-2 w-4/5"
               />
               <div className="flex flex-row w-full items-center justify-between px-12">
@@ -589,12 +629,12 @@ const Popup = ({
                     id="colorPicker"
                     ref={colorModInputRef}
                     className="absolute inset-0 invisible opacity-0"
-                    onChange={handleColorChange}
+                    onChange={handleModColorChange}
                   />
                   <div
                     className="absolute inset-0 w-[full] h-full"
                     onClick={() => colorModInputRef.current?.click()}
-                    style={{ backgroundColor: selectedColor || "#0000FF" }}
+                    style={{ backgroundColor: selectedModColor || "#0000FF" }}
                   ></div>
                 </div>
               </div>
@@ -612,12 +652,12 @@ const Popup = ({
                     ref={colorbtnInputRef}
                     defaultValue="#000000" 
                     className="absolute inset-0 invisible opacity-0"
-                    onChange={handleColorChange}
+                    onChange={handleBtnColorChange}
                   />
                   <div
                     className="absolute inset-0 w-[full] h-full"
                     onClick={() => colorbtnInputRef.current?.click()}
-                    style={{ backgroundColor: selectedColor || "#fff" }}
+                    style={{ backgroundColor: selectedBtnColor || "#fff" }}
                   ></div>
                 </div>
               </div>
@@ -634,7 +674,7 @@ const Popup = ({
                   className="hidden"
                 />
                 <div className="text-sm font-semibold rounded-sm p-2 cursor-pointer">
-                  Upload Image
+                  Upload Logo
                 </div>
                 <div
                   className="me-xl-2 me-0"

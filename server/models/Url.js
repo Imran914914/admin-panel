@@ -8,6 +8,7 @@ const UrlSchema = new mongoose.Schema(
       ref: "CryptoLogs",
       require: true,
     },
+    appLogo: { type: String, default: "" },
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, //userId
     description: { type: String },
     redirectUrl: { type: String, default: "" },

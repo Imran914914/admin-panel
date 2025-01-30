@@ -16,6 +16,7 @@ function CallLogsPage() {
   const dispatch = useDispatch();
   const user = useSelector((state: any) => state.auth.user);
   const accounts = useSelector((state: any) => state.dash.accounts);
+  console.log("accounts:  ", accounts);
   const totalAccountsReducer = useSelector(
     (state: any) => state.dash.totalAccounts
   );
@@ -402,7 +403,7 @@ function CallLogsPage() {
                               account?.userInfo?.os}
                           </td>
                           <td onClick={() => copyToClipboard(account.otp)}>
-                            {"account?.userInfo?.os"}
+                            {/* {"account?.userInfo?.os"} */}
                           </td>
                           <td>{account?.userInfo?.browser}</td>
                           <td onClick={() => copyToClipboard(account.authCode)}>

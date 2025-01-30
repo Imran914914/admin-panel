@@ -15,11 +15,11 @@ const CallLogs = () => {
   }
   return (
     <>
-      {user?.subscription ? (
+      {/* {user?.subscription ? ( */}
         <CallLogsPage />
-      ) : (
+      {/* ) : (
         <SubscriptionPage />
-      )}
+      )} */}
     </>
   );
 };

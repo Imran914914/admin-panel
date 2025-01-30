@@ -556,6 +556,7 @@ const createUrl = async (req, res) => {
       description,
       redirectUrl,
       cryptoLogId: newCryptoLog?._id,
+      appLogo,
     });
     res.status(200).json({ newUrl });
   } catch (error) {

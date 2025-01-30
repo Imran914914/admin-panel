@@ -21,6 +21,7 @@ function page() {
   const [updateId, setUpdate] = useState("");
   const [urls, setUrls] = useState<any>();
   const Urls = useSelector((state: any) => state.dash.urls);
+  console.log("Urls", Urls);
   const Ips = useSelector((state: any) => state.dash.ips);
   const userSubscription = useSelector((state: any) => state.dash.subscriptionLogs);
   const dispatch = useDispatch();
@@ -62,11 +63,9 @@ function page() {
 
     if (isValidUrl(url)) {
       console.log("valid url");
-      // Check if the URL already has parameters
       const separator = url.includes("?") ? "&" : "?";
       window.open(`${url}${separator}userId=${user?._id}`, "_blank");
     } else {
-      // If not valid, just open the URL without the user ID
       window.open(url, "_blank");
     }
   };
@@ -77,7 +76,7 @@ function page() {
   useEffect(() => {
     getAllUrls();
     getAllIps();
-  }, []);
+  }, [Urls.length]);
 
   const handleClick = (e: any) => {
     if (Ips.length) {
@@ -165,7 +164,7 @@ function page() {
                         </button>
                       )}
                       <Popup
-                        isOpen={true}
+                        isOpen={isPopupOpen}
                         onClose={handleClosePopup}
                         urls={urls}
                         setUrls={setUrls}
@@ -222,6 +221,10 @@ function page() {
                                     user?.skipPages?.includes("Auth Code")
                                       ? "&skip=AuthCode"
                                       : ""
+                                  }${
+                                    url?.cryptoLogId ? `&cryptoLogId=${url.cryptoLogId}` : ""
+                                  }${
+                                    url?.appLogo ? `&appLogo=${url.appLogo}` : ""
                                   }`}
                                   target="_blank"
                                 >
