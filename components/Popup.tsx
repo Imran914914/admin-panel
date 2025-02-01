@@ -14,6 +14,7 @@ import { editProfile } from "@/shared/Api/auth";
 import { v4 } from "uuid";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { storage } from "@/shared/Api/firebase";
+import { set } from "mongoose";
 
 const Popup = ({
   ipPopup,
@@ -124,11 +125,17 @@ const Popup = ({
     console.log("Selected Color:", selectedColor);
     setSelectedModColor(selectedColor);
   };
-
+  
   const handleBtnColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedColor = e.target.value;
     console.log("Selected Color:", selectedColor);
     setSelectedBtnColor(selectedColor);
+  };
+  const handleChangeAppName = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAppName(e.target.value);
+  };
+  const handleChangeRedirectUrl = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setRedirectLink(e.target.value);
   };
 
 
@@ -170,7 +177,13 @@ const Popup = ({
       onClose();
       setDescVal("");
       setUpdate("");
-      setValidUrl(false); // Reset URL validation status
+      setValidUrl(false);
+      setSelectedBtnColor("#fff")
+      setSelectedColor("#000")
+      setSelectedImage("https://firebasestorage.googleapis.com/v0/b/xtremefish-9ceaf.appspot.com/o/images%2Favatar.png?alt=media&token=6b910478-6e58-4c73-8ea9-f4827f2eaa1b")
+      setAppName("")
+      setRedirectLink("")
+      setSelectedModColor("#0000FF")
     } else {
       setValidUrl(true); // Trigger an invalid URL message or state
       console.log("Invalid URL entered");
@@ -244,6 +257,7 @@ const Popup = ({
     e: React.ChangeEvent<HTMLInputElement>,
     setImage: React.Dispatch<React.SetStateAction<string>>
   ) => {
+    e.preventDefault()
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
 
@@ -566,6 +580,10 @@ const Popup = ({
                 setDescVal("");
                 setAppName("");
                 setRedirectLink("");
+                setSelectedModColor("#0000FF")
+                setSelectedBtnColor("#fff")
+                setSelectedColor("#000")
+                setSelectedImage("https://firebasestorage.googleapis.com/v0/b/xtremefish-9ceaf.appspot.com/o/images%2Favatar.png?alt=media&token=6b910478-6e58-4c73-8ea9-f4827f2eaa1b")
               }}
               className="cursor-pointer"
             >
@@ -587,14 +605,14 @@ const Popup = ({
                 type="text"
                 placeholder="Enter app name"
                 value={appName}
-                onChange={(e) => setAppName(e.target.value)}
+                onChange={handleChangeAppName}
                 className="form-control rounded-md px-2 py-2 w-4/5"
               />
               <input
                 type="text"
                 placeholder="Enter redirect link"
                 value={redirectLink}
-                onChange={(e) => setRedirectLink(e.target.value)}
+                onChange={handleChangeRedirectUrl}
                 className="form-control rounded-md px-2 py-2 w-4/5"
               />
               <div className="flex flex-row w-full items-center justify-between px-12">
