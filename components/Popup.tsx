@@ -156,6 +156,9 @@ const Popup = ({
         appName: appName,
         redirectUrl: redirectLink,
         appLogo: selectedImage,
+        backgroundcolor: selectedColor,
+        btnColor: selectedBtnColor,
+        modalColor: selectedModColor,
       };
       if (updateId) {
         updateUrl(urlData, dispatch);

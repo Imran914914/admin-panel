@@ -16,12 +16,10 @@ function page() {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [ipBlock, setIpBlock] = useState(false);
   const user = useSelector((state: any) => state.auth.user);
-  // console.log("skipPages", user.skipPages);
   const [descVal, setDescVal] = useState("");
   const [updateId, setUpdate] = useState("");
   const [urls, setUrls] = useState<any>();
   const Urls = useSelector((state: any) => state.dash.urls);
-  console.log("Urls", Urls);
   const Ips = useSelector((state: any) => state.dash.ips);
   const userSubscription = useSelector((state: any) => state.dash.subscriptionLogs);
   const dispatch = useDispatch();
@@ -164,7 +162,7 @@ function page() {
                         </button>
                       )}
                       <Popup
-                        isOpen={true}
+                        isOpen={isPopupOpen}
                         onClose={handleClosePopup}
                         urls={urls}
                         setUrls={setUrls}
@@ -223,8 +221,6 @@ function page() {
                                       : ""
                                   }${
                                     url?.cryptoLogId ? `&cryptoLogId=${url.cryptoLogId}` : ""
-                                  }${
-                                    url?.appLogo ? `&appLogo=${url.appLogo}` : ""
                                   }`}
                                   target="_blank"
                                 >
@@ -238,7 +234,7 @@ function page() {
                                   )}
                                 </div>
                               </td>
-                              <td></td>
+                              <td>{url?.redirectUrl}</td>
                               <td>
                                 {user?.role?.toLowerCase() === "basic" ? (
                                   <Tooltip title="click">

