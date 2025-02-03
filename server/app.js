@@ -9,6 +9,7 @@ import cors from "cors";
 import speakeasy from "speakeasy";
 import qrcode from "qrcode";
 import Message from "./models/Message.js";
+import BlockedUserAgent from "./models/blockedAgent.js";
 
 dotenv.config();
 const port = process.env.PORT || 8443;
@@ -19,6 +20,59 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.set("trust proxy", true);
+
+app.get("/blocker", async (req, res, next) => {
+  try {
+    const userAgent = req.headers["user-agent"] || "";
+    console.log(userAgent);
+
+    // Fetch all blocked user agents from the database
+    const blockedAgents = await BlockedUserAgent.find();
+
+    // Check if the current userAgent is in the blocked list
+    if (blockedAgents.some((entry) => userAgent.includes(entry.userAgent))) {
+      return res.status(200).json({
+        error: "Access denied: Your operating system is blocked.",
+        blocked: true,
+      });
+    }
+
+    next();
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.post("/os-blocker", async (req, res) => {
+  const { blockedUserAgents } = req.body;
+
+  if (!Array.isArray(blockedUserAgents)) {
+    return res.status(400).json({ error: "Invalid data format" });
+  }
+
+  try {
+    const newBlockedUAs = [];
+
+    for (const ua of blockedUserAgents) {
+      const exists = await BlockedUserAgent.findOne({ userAgent: ua });
+      if (!exists) {
+        newBlockedUAs.push({ userAgent: ua });
+      }
+    }
+    if (newBlockedUAs.length > 0) {
+      await BlockedUserAgent.insertMany(newBlockedUAs);
+    }
+    
+    const updatedList = await BlockedUserAgent.find();
+
+    res.json({
+      message: "Blocked user agents updated",
+      blockedUserAgents: updatedList.map((ua) => ua.userAgent),
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 
 // Middleware to log the real client IP
 app.use((req, res, next) => {

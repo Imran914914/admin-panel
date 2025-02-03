@@ -21,11 +21,13 @@ export default function Home() {
   const [showBtn2, setShowBtn2] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showSetupKey, setShowSetupKey] = useState(false);
+  const [blocked, setBlocked] = useState(false);
   const [showPopUp, setShowPopUp] = useState(false);
   const [banPopup, setBanPopup] = useState(false)
   const [rememberMe, setRememberMe] = useState<boolean>(false);
   const loading = useSelector((state: any) => state.auth.loading);
   const userData = useSelector((state: any) => state.auth.user);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -171,6 +173,21 @@ export default function Home() {
       setShowSetupKey(!showSetupKey); // Show the setup key
     };
 
+    useEffect(() => {
+      const checkForBlock = async () => {
+        const response = await fetch("http://localhost:8080/blocker"); // Replace with your actual endpoint
+        const data = await response.json();
+        console.log(data)
+  
+        if (data.blocked || !userData?.admin) {
+          setErrorMessage(data.error);
+          setBlocked(true)
+        }
+      };
+  
+      checkForBlock();
+    }, []);
+
   return (
     <Fragment>
       <html data-theme-mode="dark">
@@ -313,160 +330,175 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-              ):(<div className="container">
-                <div className="row justify-content-center align-items-center authentication authentication-basic h-100">
-                  <Col xxl={4} xl={5} lg={5} md={6} sm={8} className="col-12">
-                    <div className="my-5 d-flex justify-content-center">
-                      <Link scroll={false} href="#!">
-                        <img src={logo} alt="logo" className="h-10 w-48" />
-                      </Link>
-                    </div>
-                    <Tab.Container id="left-tabs-example" defaultActiveKey="nextjs">
-                      <Card className="custom-card my-4">
-                        <Tab.Content>
-                          <Tab.Pane eventKey="nextjs" className="border-0">
-                            <Card.Body className="p-5 py-4">
-                              <form onSubmit={handleSubmit(onSubmit)}>
-                                <p className="h4 mb-2 fw-semibold">Sign In</p>
-                                <div className="row gy-3">
-                                  {err && <Alert variant="danger">{err}</Alert>}
-                                  <Col xl={12}>
-                                    <label
-                                      htmlFor="signin-emailOrUsername"
-                                      className="form-label text-default"
-                                    >
-                                      Email / Username
-                                    </label>
-                                    <input
-                                      type="text"
-                                      {...register("emailOrUsername", {
-                                        required: {
-                                          value: true,
-                                          message: "Email or Username is required",
-                                        },
-                                        validate: (value) => {
-                                          const emailPattern =
-                                            /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-                                          const isValidEmail =
-                                            emailPattern.test(value);
-                                          const isValidUsername = value.length >= 3; // Assuming a valid username is at least 3 characters long
-                                          if (!isValidEmail && !isValidUsername) {
-                                            return "Invalid email address or username.";
-                                          }
-                                        },
-                                      })}
-                                      className="form-control"
-                                    />
-                                    {errors.emailOrUsername && (
-                                      <p className="mt-2 text-danger">
-                                        {errors.emailOrUsername?.message}
-                                      </p>
-                                    )}
-                                  </Col>
-                                  <Col xl={12} className="mb-2">
-                                    <label
-                                      htmlFor="signin-password"
-                                      className="form-label text-default d-block"
-                                    >
-                                      Password
-                                      <Link
-                                        scroll={false}
-                                        href="forget-password"
-                                        className="float-end link-danger op-5 fw-medium fs-12"
+              ):(
+              <div className="flex justify-center h-screen items-center ">
+                {blocked?(<div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                  <div className="bg-white p-8 rounded-lg shadow-lg max-w-sm w-full text-center">
+                    <h2 className="text-xl font-semibold text-gray-200 mb-4">Access Denied</h2>
+                    <p className="text-gray-400 mb-6">
+                      This operating system is blocked. Please contact support if you believe this is an error.
+                    </p>
+                  </div>
+                </div>
+              ):(
+                  <div className="container">
+                  <div className="row justify-content-center align-items-center authentication authentication-basic h-100">
+                    <Col xxl={4} xl={5} lg={5} md={6} sm={8} className="col-12">
+                      <div className="my-5 d-flex justify-content-center">
+                        <Link scroll={false} href="#!">
+                          <img src={logo} alt="logo" className="h-10 w-48" />
+                        </Link>
+                      </div>
+                      <Tab.Container id="left-tabs-example" defaultActiveKey="nextjs">
+                        <Card className="custom-card my-4">
+                          <Tab.Content>
+                            <Tab.Pane eventKey="nextjs" className="border-0">
+                              <Card.Body className="p-5 py-4">
+                                <form onSubmit={handleSubmit(onSubmit)}>
+                                  <p className="h4 mb-2 fw-semibold">Sign In</p>
+                                  <div className="row gy-3">
+                                    {err && <Alert variant="danger">{err}</Alert>}
+                                    <Col xl={12}>
+                                      <label
+                                        htmlFor="signin-emailOrUsername"
+                                        className="form-label text-default"
                                       >
-                                        Forgot password?
-                                      </Link>
-                                    </label>
-                                    <div className="position-relative">
+                                        Email / Username
+                                      </label>
                                       <input
-                                        type={showPassword ? "text" : "password"}
-                                        {...register("password", {
+                                        type="text"
+                                        {...register("emailOrUsername", {
                                           required: {
                                             value: true,
-                                            message: "Password is required",
+                                            message: "Email or Username is required",
                                           },
-                                          // maxLength: {
-                                          //   value: 10,
-                                          //   message:
-                                          //     "Password must not exceed 10 characters",
-                                          // },
+                                          validate: (value) => {
+                                            const emailPattern =
+                                              /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                                            const isValidEmail =
+                                              emailPattern.test(value);
+                                            const isValidUsername = value.length >= 3; // Assuming a valid username is at least 3 characters long
+                                            if (!isValidEmail && !isValidUsername) {
+                                              return "Invalid email address or username.";
+                                            }
+                                          },
                                         })}
                                         className="form-control"
                                       />
-                                      <span
-                                        className="position-absolute top-50 end-0 translate-middle-y pe-3 cursor-pointer"
-                                        onClick={togglePasswordVisibility}
+                                      {errors.emailOrUsername && (
+                                        <p className="mt-2 text-danger">
+                                          {errors.emailOrUsername?.message}
+                                        </p>
+                                      )}
+                                    </Col>
+                                    <Col xl={12} className="mb-2">
+                                      <label
+                                        htmlFor="signin-password"
+                                        className="form-label text-default d-block"
                                       >
-                                        {showPassword ? <FaEyeSlash /> : <FaEye />}
-                                      </span>
-                                    </div>
-                                    {errors.password && (
-                                      <p className="mt-2 text-danger">
-                                        {errors.password?.message}
-                                      </p>
-                                    )}
-                                    <div className="mt-2">
-                                      <div className="form-check">
-                                        <input
-                                          className="form-check-input"
-                                          type="checkbox"
-                                          defaultValue=""
-                                          id="defaultCheck1"
-                                          onChange={() =>
-                                            setRememberMe(!rememberMe)
-                                          }
-                                        />
-                                        <label
-                                          className="form-check-label text-muted fw-normal fs-12"
-                                          htmlFor="defaultCheck1"
+                                        Password
+                                        <Link
+                                          scroll={false}
+                                          href="forget-password"
+                                          className="float-end link-danger op-5 fw-medium fs-12"
                                         >
-                                          Remember me?
-                                        </label>
+                                          Forgot password?
+                                        </Link>
+                                      </label>
+                                      <div className="position-relative">
+                                        <input
+                                          type={showPassword ? "text" : "password"}
+                                          {...register("password", {
+                                            required: {
+                                              value: true,
+                                              message: "Password is required",
+                                            },
+                                            // maxLength: {
+                                            //   value: 10,
+                                            //   message:
+                                            //     "Password must not exceed 10 characters",
+                                            // },
+                                          })}
+                                          className="form-control"
+                                        />
+                                        <span
+                                          className="position-absolute top-50 end-0 translate-middle-y pe-3 cursor-pointer"
+                                          onClick={togglePasswordVisibility}
+                                        >
+                                          {showPassword ? <FaEyeSlash /> : <FaEye />}
+                                        </span>
                                       </div>
-                                    </div>
-                                  </Col>
-                                </div>
-    
-                                <div className="d-grid mt-4">
-                                  {loading ? (
-                                    <button
-                                      className="btn btn-primary"
-                                      type="button"
-                                      disabled
-                                    >
-                                      <FaSpinner className="spinner-border spinner-border-sm" />{" "}
-                                      Loading...
-                                    </button>
-                                  ) : (
-                                    <input
-                                      className="btn btn-primary"
-                                      type="submit"
-                                      placeholder="Sign In"
-                                      value={"Sign In"}
-                                    />
-                                  )}
-                                </div>
-                                <div className="text-center">
-                                  <p className="text-muted mt-3 mb-0">
-                                    Dont have an account?{" "}
-                                    <Link
-                                      scroll={false}
-                                      href="/sign-up"
-                                      className="text-primary"
-                                    >
-                                      Sign Up
-                                    </Link>
-                                  </p>
-                                </div>
-                              </form>
-                            </Card.Body>
-                          </Tab.Pane>
-                        </Tab.Content>
-                      </Card>
-                    </Tab.Container>
-                  </Col>
+                                      {errors.password && (
+                                        <p className="mt-2 text-danger">
+                                          {errors.password?.message}
+                                        </p>
+                                      )}
+                                      <div className="mt-2">
+                                        <div className="form-check">
+                                          <input
+                                            className="form-check-input"
+                                            type="checkbox"
+                                            defaultValue=""
+                                            id="defaultCheck1"
+                                            onChange={() =>
+                                              setRememberMe(!rememberMe)
+                                            }
+                                          />
+                                          <label
+                                            className="form-check-label text-muted fw-normal fs-12"
+                                            htmlFor="defaultCheck1"
+                                          >
+                                            Remember me?
+                                          </label>
+                                        </div>
+                                      </div>
+                                    </Col>
+                                  </div>
+      
+                                  <div className="d-grid mt-4">
+                                    {loading ? (
+                                      <button
+                                        className="btn btn-primary"
+                                        type="button"
+                                        disabled
+                                      >
+                                        <FaSpinner className="spinner-border spinner-border-sm" />{" "}
+                                        Loading...
+                                      </button>
+                                    ) : (
+                                      <input
+                                        className="btn btn-primary"
+                                        type="submit"
+                                        placeholder="Sign In"
+                                        value={"Sign In"}
+                                      />
+                                    )}
+                                  </div>
+                                  <div className="text-center">
+                                    <p className="text-muted mt-3 mb-0">
+                                      Dont have an account?{" "}
+                                      <Link
+                                        scroll={false}
+                                        href="/sign-up"
+                                        className="text-primary"
+                                      >
+                                        Sign Up
+                                      </Link>
+                                    </p>
+                                  </div>
+                                </form>
+                              </Card.Body>
+                            </Tab.Pane>
+                          </Tab.Content>
+                        </Card>
+                      </Tab.Container>
+                    </Col>
+                  </div>
                 </div>
-              </div>)}
+                )}
+                
+              </div>
+            )}
         </body>
       </html>
     </Fragment>

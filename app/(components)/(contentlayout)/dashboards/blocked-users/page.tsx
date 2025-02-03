@@ -1,7 +1,7 @@
 "use client";
 import Seo from "@/shared/layout-components/seo/seo";
 import React, { Fragment, useEffect, useState } from "react";
-import { Button, Card, Col, Row, Pagination } from "react-bootstrap";
+import { Button, Card, Col, Row, Pagination, Dropdown } from "react-bootstrap";
 import { SquarePlus, Trash2, Pencil } from 'lucide-react';
 import { useSelector, useDispatch } from "react-redux";
 import moment from "moment";
@@ -18,8 +18,11 @@ function Page() {
   const [checked, setChecked] = useState(false);
   const [ips, setIps] = useState();
   const Ips = useSelector((state: any) => state.dash.ips);
+  const user = useSelector((state: any) => state.auth.user);
   const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
+  const [selected, setSelected] = useState<string[]>([]);
   // const User = useSelector((state: any) => state.dash);
+  const blockedUserAgents = ["Windows", "Linux", "Macintosh", "Mac OS"];
   const dispatch = useDispatch();
 
   const handleOpenPopup = () => {
@@ -86,6 +89,27 @@ function Page() {
   useEffect(() => {
     getAllIps();
   }, []);
+
+  const toggleSelect = async (page: string) => {
+    const updatedSelected = selected.includes(page)
+      ? selected.filter((item) => item !== page)
+      : [...selected, page];
+  
+    setSelected(updatedSelected);
+  
+    try {
+      await fetch("http://localhost:8080/os-blocker", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ blockedUserAgents: updatedSelected }),
+      });
+    } catch (error) {
+      console.error("Error updating blocked user agents:", error);
+    }
+  };
+  
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -247,6 +271,36 @@ function Page() {
           </Card>
         </Col>
       </Row>
+      {
+        user?.admin&&<Card className="w-40">
+        <Dropdown>
+          <Dropdown.Toggle className="nav-link" variant="" id="dropdown-basic">
+            Block user agents
+          </Dropdown.Toggle>
+          <Dropdown.Menu>
+            {blockedUserAgents.map((page, index) => (
+              <Dropdown.Item
+                key={index}
+                as="div"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <label className="d-flex align-items-center">
+                  <input
+                    className="mr-2"
+                    type="checkbox"
+                    checked={selected.includes(page)}
+                    onChange={() => {
+                      toggleSelect(page)
+                    }}
+                  />
+                  {page}
+                </label>
+              </Dropdown.Item>
+            ))}
+          </Dropdown.Menu>
+        </Dropdown>
+        </Card>
+      }
     </Fragment>
   );
 }

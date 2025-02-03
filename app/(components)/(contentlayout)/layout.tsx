@@ -9,7 +9,8 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
 const Layout = ({ children }: any) => {
-  const [loading, setLoading] = useState(true); // For waiting on auth check
+  const [loading, setLoading] = useState(true);
+  const [blocked, setBlocked] = useState(false)
   const router = useRouter();
   const isAuthenticated = useSelector(
     (state: any) => state.auth.isAuthenticated
@@ -44,7 +45,10 @@ const Layout = ({ children }: any) => {
     } else {
       setLoading(false);
     }
-  }, [isAuthenticated, router, isVerified]);
+    if(blocked && !user?.admin){
+      router.push("/");
+    }
+  }, [isAuthenticated, router, isVerified, blocked]);
   const local_varaiable = useSelector((state: any) => state);
 
   useEffect(() => {
@@ -52,6 +56,20 @@ const Layout = ({ children }: any) => {
     document.documentElement.setAttribute("data-theme-mode", themeMode);
     document.body.className = themeMode;
   }, [local_varaiable.dataThemeMode]);
+
+  useEffect(() => {
+    const checkForBlock = async () => {
+      const response = await fetch("http://localhost:8080/blocker"); // Replace with your actual endpoint
+      const data = await response.json();
+      console.log(data)
+
+      if (data.blocked) {
+        setBlocked(true)
+      }
+    };
+
+    checkForBlock();
+  }, []);
 
   if (loading || isAuthenticated === undefined) {
     // Show a loading spinner or nothing while auth is being checked
