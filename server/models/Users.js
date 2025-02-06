@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema(
     coverImage: { type: String },
     userName: { type: String, required: false },
     password: { type: String, required: false, default: null },
-    role: {type: String, default: "basic"},//we can have multiple roles here basic, premium ,admin
+    role: {type: String, default: ""},//we can have multiple roles here basic, premium ,admin
     bio: { type: String, required: false, default: "" },
     isVerified: { type: Boolean, default: false },
     otp: { type: Number, default: 0 },
