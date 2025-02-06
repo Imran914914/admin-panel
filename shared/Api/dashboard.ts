@@ -95,13 +95,11 @@ export const getAlluserCount = async (dispatch: any) => {
     dispatch({ type: GET_COUNT_INIT });
     const response = await apiClient.get("/dashboard/getAllUser");
 
-    // If the request was successful
     if (response.status === 200) {
       dispatch({ type: GET_COUNT_SUCCESS, payload: response.data });
     }
     return response?.data;
   } catch (error: any) {
-    // Handle server or network errors
     if (error.response) {
       dispatch({
         type: GET_COUNT_FAILURE,
@@ -115,7 +113,6 @@ export const getAlluserCount = async (dispatch: any) => {
         type: GET_COUNT_FAILURE,
         payload: error.message,
       });
-      // return error.message;
     }
   }
 };
@@ -1093,9 +1090,12 @@ export const getSubscriptionHistory = async (userIds: any[], dispatch: any) => {
   try {
     dispatch({ type: GET_SUBSCRIPTIONHISTORY_INIT });
 
-    const response = await apiClient.get(`/dashboard/getMySubscriptionsHistory`, {
-      params: { userIds }, // Pass array of userIds as a query parameter
-    });
+    const response = await apiClient.get(
+      `/dashboard/getMySubscriptionsHistory`,
+      {
+        params: { userIds }, // Pass array of userIds as a query parameter
+      }
+    );
 
     // If the request was successful
     if (response.status === 200) {
@@ -1142,7 +1142,7 @@ export const getSubscriptionHistoryAdmin = async (
 
     // If the request was successful
     if (response.status === 200) {
-      console.log('response at the api', response?.data?.subscriptionHistories)
+      console.log("response at the api", response?.data?.subscriptionHistories);
       dispatch({
         type: GET_ADMINSUBSCRIPTIONHISTORY_SUCCESS,
         payload: response?.data?.subscriptionHistories,
@@ -1187,7 +1187,7 @@ export const fetchUsers = async () => {
 
 export const fetchMessages = async () => {
   try {
-    const response = await apiClient.get("/dashboard/messages");  // API endpoint for fetching messages
+    const response = await apiClient.get("/dashboard/messages"); // API endpoint for fetching messages
     if (response?.status !== 200) {
       console.error("Failed to fetch messages:", response.statusText);
       return [];

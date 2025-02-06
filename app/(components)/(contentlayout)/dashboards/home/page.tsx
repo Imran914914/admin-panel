@@ -92,11 +92,12 @@ const Home = () => {
 
 
   const getAllusersCount = async () => {
-    const { TotalUser, PercentageChange } = await getAlluserCount(dispatch);
-    setAllcounts(TotalUser ?? 0);
+    // const { TotalUser, PercentageChange } = await getAlluserCount(dispatch);
+    const result = await getAlluserCount(dispatch);
+    setAllcounts(result?.TotalUser ?? 0);
     setPercentage({
       ...percentage,
-      totalPercentage: PercentageChange,
+      totalPercentage: result?.PercentageChange ?? 0,
     });
   };
   const getAllPosts = async () => {
