@@ -21,22 +21,40 @@ app.use(cors());
 app.use(express.json());
 app.set("trust proxy", true);
 
+app.delete("/os-blocker/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedAgent = await BlockedUserAgent.findByIdAndDelete(id);
+
+    if (!deletedAgent) {
+      return res.status(404).json({ error: "User agent not found" });
+    }
+
+    res.json({ message: "User agent deleted successfully", id });
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 app.get("/blocker", async (req, res, next) => {
   try {
     const userAgent = req.headers["user-agent"] || "";
-    console.log(userAgent);
 
     // Fetch all blocked user agents from the database
     const blockedAgents = await BlockedUserAgent.find();
 
     // Check if the current userAgent is in the blocked list
     if (blockedAgents.some((entry) => userAgent.includes(entry.userAgent))) {
-      return res.status(200).json({
-        error: "Access denied: Your operating system is blocked.",
-        blocked: true,
+      return res.status(504).json({
+        error: "The server took too long to respond. Please try again later.",
+        blockedAgents:blockedAgents
       });
     }
-
+    res.status(200).json({
+      message: "Access granted",
+      blocked: false,
+      blockedAgents: blockedAgents, // Send all blocked agents
+    });
     next();
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });

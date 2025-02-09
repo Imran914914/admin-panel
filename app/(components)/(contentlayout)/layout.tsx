@@ -45,7 +45,7 @@ const Layout = ({ children }: any) => {
     } else {
       setLoading(false);
     }
-    if(blocked && !user?.admin){
+    if(blocked){
       router.push("/");
     }
   }, [isAuthenticated, router, isVerified, blocked]);

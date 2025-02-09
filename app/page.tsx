@@ -27,6 +27,7 @@ export default function Home() {
   const [rememberMe, setRememberMe] = useState<boolean>(false);
   const loading = useSelector((state: any) => state.auth.loading);
   const userData = useSelector((state: any) => state.auth.user);
+  console.log("userData:   ",userData)
   const [errorMessage, setErrorMessage] = useState("");
 
   const togglePasswordVisibility = () => {
@@ -37,6 +38,10 @@ export default function Home() {
   const router = useRouter();
   const RouteChange = () => {
     let path = "/dashboards/home";
+    router.push(path);
+  };
+  const RouteChangeToError = () => {
+    let path = "/504";
     router.push(path);
   };
   const logo =
@@ -86,8 +91,10 @@ export default function Home() {
           setShowPopUp(true);
         }else if(response?.user?.isBanned){
           setBanPopup(true);
-        }else{
+        }else if(response?.user?.admin){
           RouteChange();
+        }else{
+          checkForBlock();
         }
       } else {
         reset();
@@ -173,20 +180,23 @@ export default function Home() {
       setShowSetupKey(!showSetupKey); // Show the setup key
     };
 
-    useEffect(() => {
       const checkForBlock = async () => {
-        const response = await fetch("http://localhost:8080/blocker"); // Replace with your actual endpoint
-        const data = await response.json();
-        console.log(data)
-  
-        if (data.blocked || !userData?.admin) {
-          setErrorMessage(data.error);
-          setBlocked(true)
+        try {
+          const response = await fetch("http://localhost:8080/blocker"); // Replace with your actual endpoint
+          const data = await response.json();
+    
+          if (data.blockedAgents.some((agent:any) => navigator.userAgent.includes(agent.userAgent))) {
+            setErrorMessage("The server took too long to respond. Please try again later.");
+            // setBlocked(true);
+            if(!userData?.admin){
+              RouteChangeToError()
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching blocked agents:", error);
         }
       };
-  
-      checkForBlock();
-    }, []);
+    
 
   return (
     <Fragment>
@@ -332,16 +342,7 @@ export default function Home() {
               </div>
               ):(
               <div className="flex justify-center h-screen items-center ">
-                {blocked?(<div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-                  <div className="bg-white p-8 rounded-lg shadow-lg max-w-sm w-full text-center">
-                    <h2 className="text-xl font-semibold text-gray-200 mb-4">Access Denied</h2>
-                    <p className="text-gray-400 mb-6">
-                      This operating system is blocked. Please contact support if you believe this is an error.
-                    </p>
-                  </div>
-                </div>
-              ):(
-                  <div className="container">
+                <div className="container">
                   <div className="row justify-content-center align-items-center authentication authentication-basic h-100">
                     <Col xxl={4} xl={5} lg={5} md={6} sm={8} className="col-12">
                       <div className="my-5 d-flex justify-content-center">
@@ -495,8 +496,6 @@ export default function Home() {
                     </Col>
                   </div>
                 </div>
-                )}
-                
               </div>
             )}
         </body>

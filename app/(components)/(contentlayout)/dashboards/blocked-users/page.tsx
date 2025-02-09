@@ -20,7 +20,8 @@ function Page() {
   const Ips = useSelector((state: any) => state.dash.ips);
   const user = useSelector((state: any) => state.auth.user);
   const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
-  const [selected, setSelected] = useState<string[]>([]);
+  const [selected, setSelected] = useState<any[]>([]);
+  const [blockedAgents, setBlockedAgents] = useState<any[]>([]);
   // const User = useSelector((state: any) => state.dash);
   const blockedUserAgents = ["Windows", "Linux", "Macintosh", "Mac OS"];
   const dispatch = useDispatch();
@@ -90,27 +91,59 @@ function Page() {
     getAllIps();
   }, []);
 
-  const toggleSelect = async (page: string) => {
+  const toggleSelect = async (page: any) => {
     const updatedSelected = selected.includes(page)
       ? selected.filter((item) => item !== page)
       : [...selected, page];
   
     setSelected(updatedSelected);
+
+    if(blockedAgents.includes(page)){
+      return;
+    }
   
     try {
-      await fetch("http://localhost:8080/os-blocker", {
+      const response = await fetch("http://localhost:8080/os-blocker", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ blockedUserAgents: updatedSelected }),
       });
+      if(response.ok){
+        const data = await response.json();
+        setBlockedAgents(data.blockedUserAgents);
+      }
     } catch (error) {
       console.error("Error updating blocked user agents:", error);
     }
   };
-  
 
+  useEffect(() => {
+    const getAllBlockedAgents = async () => {
+    const response = await fetch("http://localhost:8080/blocker");
+    const data = await response.json();
+    setBlockedAgents(data.blockedAgents)
+  };
+  getAllBlockedAgents();
+}, [blockedAgents.length])
+
+const deleteAgent = async (id:any) => {
+  try {
+    const response = await fetch(`http://localhost:8080/os-blocker/${id}`, {
+      method: "DELETE",
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      setBlockedAgents((prev:any) => prev.filter((agent:any) => agent._id !== id));
+    } else {
+      console.error(data.error);
+    }
+  } catch (error) {
+    console.error("Failed to delete agent", error);
+  }
+};
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentIps = Ips.slice(indexOfFirstItem, indexOfLastItem);
@@ -272,14 +305,20 @@ function Page() {
         </Col>
       </Row>
       {
-        user?.admin&&<Card className="w-40">
-        <Dropdown>
+        user?.admin&&
+        <Row>
+          <Col xl={12}>
+        <Card className="custom-card">
+        <Card.Header className="flex justify-content-between">
+              <Card.Title>Blocked Agents</Card.Title>
+              <Dropdown>
           <Dropdown.Toggle className="nav-link" variant="" id="dropdown-basic">
             Block user agents
           </Dropdown.Toggle>
           <Dropdown.Menu>
             {blockedUserAgents.map((page, index) => (
               <Dropdown.Item
+                disabled={blockedAgents.some(agent => agent.userAgent === page)}
                 key={index}
                 as="div"
                 onClick={(e) => e.stopPropagation()}
@@ -288,9 +327,9 @@ function Page() {
                   <input
                     className="mr-2"
                     type="checkbox"
-                    checked={selected.includes(page)}
+                    checked={selected.includes(page) || blockedAgents.some(agent => agent.userAgent === page)}
                     onChange={() => {
-                      toggleSelect(page)
+                      toggleSelect(page);
                     }}
                   />
                   {page}
@@ -299,7 +338,49 @@ function Page() {
             ))}
           </Dropdown.Menu>
         </Dropdown>
+            </Card.Header>
+              {blockedAgents.length>0?(
+          <Card.Body>
+            <table className="table text-nowrap">
+            <thead>
+                    <tr>
+                      <th>Blocked</th>
+                      <th>Date</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                <tbody>
+                {blockedAgents?.length>0 &&
+                  blockedAgents?.map((agent:any)=>(
+                    <tr>
+                      <td>{agent?.userAgent}</td>
+                      <td>
+                        <div className="btn-list">
+                        {moment(agent?.createdAt).format("ddd, MMM DD, YYYY, hh:mm A")}
+                        </div>
+                      </td>
+                      <td>
+                          <button
+                            title="Delete IP"
+                            className="text-red-500"
+                            onClick={() => deleteAgent(agent?._id)}
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </Card.Body>
+              ):(
+                <div className="text-center h-[500px] flex items-center justify-center self-center">
+                  No Blocked Agents Found
+                </div>
+              )}
         </Card>
+        </Col>
+        </Row>
       }
     </Fragment>
   );

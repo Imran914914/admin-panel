@@ -35,6 +35,7 @@ const SignUp = async (req, res) => {
         email,
         password: hashedPassword,
         location: locationObject,
+        role:"basic",
       });
 
       const token = generateToken(newUser?._id, rememberMe);
