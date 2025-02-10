@@ -21,14 +21,11 @@ export default function Home() {
   const [showBtn2, setShowBtn2] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showSetupKey, setShowSetupKey] = useState(false);
-  const [blocked, setBlocked] = useState(false);
   const [showPopUp, setShowPopUp] = useState(false);
   const [banPopup, setBanPopup] = useState(false)
   const [rememberMe, setRememberMe] = useState<boolean>(false);
   const loading = useSelector((state: any) => state.auth.loading);
   const userData = useSelector((state: any) => state.auth.user);
-  console.log("userData:   ",userData)
-  const [errorMessage, setErrorMessage] = useState("");
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -91,10 +88,8 @@ export default function Home() {
           setShowPopUp(true);
         }else if(response?.user?.isBanned){
           setBanPopup(true);
-        }else if(response?.user?.admin){
-          RouteChange();
         }else{
-          checkForBlock();
+          RouteChange();
         }
       } else {
         reset();
@@ -177,25 +172,24 @@ export default function Home() {
     };
 
     const handleShowSetupKey = () => {
-      setShowSetupKey(!showSetupKey); // Show the setup key
+      setShowSetupKey(!showSetupKey);
     };
 
+    useEffect(() => {
       const checkForBlock = async () => {
         try {
-          const response = await fetch("http://localhost:8080/blocker"); // Replace with your actual endpoint
+          const response = await fetch("http://localhost:8080/blocker");
           const data = await response.json();
-    
           if (data.blockedAgents.some((agent:any) => navigator.userAgent.includes(agent.userAgent))) {
-            setErrorMessage("The server took too long to respond. Please try again later.");
-            // setBlocked(true);
-            if(!userData?.admin){
-              RouteChangeToError()
-            }
+            RouteChangeToError()
           }
         } catch (error) {
           console.error("Error fetching blocked agents:", error);
         }
       };
+      
+      checkForBlock();
+    }, [])
     
 
   return (
