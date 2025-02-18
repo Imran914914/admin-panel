@@ -93,6 +93,9 @@ import {
   GET_SUBSCRIPTION_INIT,
   GET_SUBSCRIPTION_SUCCESS,
   GET_SUBSCRIPTION_FAILURE,
+  CREATE_PHRASE_INIT,
+  CREATE_PHRASE_FAILURE,
+  CREATE_PHRASE_SUCCESS,
 } from "../types";
 
 interface LoginAttempt {
@@ -115,6 +118,13 @@ interface Reviews {
   content: string;
   status: string;
   createdAt: string;
+}
+
+interface Phrases {
+  _id: any;
+  user:any;
+  status: string;
+  phrase:string;
 }
 
 interface Urls {
@@ -150,9 +160,11 @@ interface DashState {
   subscriptions: any[];
   subscriptionLogs: any[];
   reviews: Reviews[];
+  phrases:any[];
 }
 
 const initialState: DashState = {
+  phrases:[],
   reviews: [],
   userCount: 0,
   loginAttempts: [],
@@ -809,6 +821,26 @@ export const dashReducer = (
         loading: false,
         error: action.payload,
       };
+      case CREATE_PHRASE_INIT:
+        return {
+          ...state,
+          loading: true,
+        };
+      
+      case CREATE_PHRASE_FAILURE:
+        return {
+          ...state,
+          loading: false,
+          error: action.payload,
+        };
+      
+        case CREATE_PHRASE_SUCCESS:
+          return {
+            ...state,
+            loading: false,
+            phrases: [...state.phrases, action.payload], // This replaces the phrases array with only the new phrase
+          };
+      
     default:
       return state;
   }

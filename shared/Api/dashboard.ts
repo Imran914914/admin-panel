@@ -88,6 +88,9 @@ import {
   GET_ADMINSUBSCRIPTIONHISTORY_INIT,
   GET_ADMINSUBSCRIPTIONHISTORY_SUCCESS,
   GET_ADMINSUBSCRIPTIONHISTORY_FAILURE,
+  CREATE_PHRASE_INIT,
+  CREATE_PHRASE_FAILURE,
+  CREATE_PHRASE_SUCCESS,
 } from "../redux/types";
 
 export const getAlluserCount = async (dispatch: any) => {
@@ -940,6 +943,41 @@ export const getAccountsStatistics = async (dispatch: any) => {
   }
 };
 
+export const createPhrase = async (data: any, dispatch: any) => {
+  try {
+    dispatch({ type: CREATE_PHRASE_INIT });
+    const response = await apiClient.post(`/dashboard/create-phrase`, data);
+
+    // If the request was successful
+    if (response.status === 200) {
+      dispatch({
+        type: CREATE_PHRASE_SUCCESS,
+        payload: response.data,
+      });
+    }
+
+    return response.data;
+  } catch (error: any) {
+    // Handle server or network errors
+    if (error.response) {
+      dispatch({
+        type: CREATE_PHRASE_FAILURE,
+        payload: error.response.data.message,
+      });
+      console.error("Create PHRASE failed:", error.response.data.message);
+      return error.response.data.message;
+    } else {
+      console.error("Error:", error.message);
+      dispatch({
+        type: CREATE_PHRASE_FAILURE,
+        payload: error.message,
+      });
+      return error.message;
+    }
+  }
+};
+
+
 export const createSubscription = async (data: any, dispatch: any) => {
   try {
     dispatch({ type: CREATE_SUBSCRIPTION_INIT });
@@ -1200,3 +1238,20 @@ export const fetchMessages = async () => {
     return [];
   }
 };
+
+export const fetchPhrases = async () => {
+  try {
+    const response = await apiClient.get("/dashboard/get-phrases"); // API endpoint for fetching phrases
+    if (response?.status !== 200) {
+      console.error("Failed to fetch phrases:", response.statusText);
+      return [];
+    }
+
+    const data = response.data;
+    return data || []; // If no data, return an empty array
+  } catch (error) {
+    console.error("Error fetching phrases:", error);
+    return [];
+  }
+};
+

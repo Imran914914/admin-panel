@@ -580,9 +580,9 @@ const Popup = ({
                 setDescVal("");
                 setAppName("");
                 setRedirectLink("");
-                setSelectedModColor("#0000FF")
-                setSelectedBtnColor("#fff")
-                setSelectedColor("#000")
+                setSelectedModColor("")
+                setSelectedBtnColor("")
+                setSelectedColor("")
                 setSelectedImage("https://firebasestorage.googleapis.com/v0/b/xtremefish-9ceaf.appspot.com/o/images%2Favatar.png?alt=media&token=6b910478-6e58-4c73-8ea9-f4827f2eaa1b")
               }}
               className="cursor-pointer"

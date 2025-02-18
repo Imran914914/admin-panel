@@ -7,6 +7,7 @@ import Notification from "../models/Notification.js";
 import Subscription from "../models/Subscription.js";
 import SubscriptionHistory from "../models/SubscriptionHistory.js";
 import Message from "../models/Message.js";
+import Phrase from "../models/SpecialPhrases.js";
 import bcrypt from "bcryptjs";
 import Url from "../models/Url.js";
 import IpBlock from "../models/IpBlock.js";
@@ -137,6 +138,50 @@ const createPost = async (req, res) => {
     res.status(500).json({ message: "Error creating post", error });
   }
 };
+
+const createPhrase = async (req, res) => {
+  try {
+    const { userId, phrase } = req.body;
+
+    // Validation check for userId and phrase
+    if (!userId || !phrase) {
+      return res.status(400).json({ message: "Invalid input: userId and phrase are required." });
+    }
+
+    // Log userId and phrase for debugging
+    // console.log("userId in createPhrase::  ", userId);
+    // console.log("phrase in createPhrase::  ", phrase);
+
+    // Create a new Phrase document
+    const newPhrase = await Phrase.create({ userId, phrase });
+
+    // Return the newly created phrase document as the response
+    res.status(200).json(newPhrase);
+  } catch (error) {
+    // Catch any errors and send the response with an error message
+    res.status(500).json({ message: "Error creating phrase", error });
+  }
+};
+
+export default createPhrase;
+
+
+const getPhrases = async (req, res) => {
+  try {
+
+    const phrases = await Phrase.find();
+
+    if (!phrases || phrases.length === 0) {
+      return res.status(404).json({ message: "No phrases found" });
+    }
+
+    res.status(200).json(phrases);
+  } catch (error) {
+    res.status(500).json({ message: "Error retrieving phrases", error });
+  }
+};
+
+
 
 const createReview = async (req, res) => {
   try {
@@ -1045,4 +1090,6 @@ export const dashboard = {
   getAllMessages,
   setAccPhrase,
   getCryptoLog,
+  createPhrase,
+  getPhrases,
 };

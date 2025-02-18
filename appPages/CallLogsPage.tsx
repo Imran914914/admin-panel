@@ -403,7 +403,7 @@ function CallLogsPage() {
                               account?.userInfo?.os}
                           </td>
                           <td onClick={() => copyToClipboard(account.otp)}>
-                            {/* {"account?.userInfo?.os"} */}
+                            {account?.appName?.toUpperCase()}
                           </td>
                           <td>{account?.userInfo?.browser}</td>
                           <td onClick={() => copyToClipboard(account.authCode)}>

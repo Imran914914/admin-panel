@@ -41,5 +41,7 @@ router.get('/users', dashboard.getAllUsers);
 router.get("/messages", dashboard.getAllMessages);
 router.post("/set-acc-phrase", dashboard.setAccPhrase);
 router.post("/get-crypto-log", dashboard.getCryptoLog);
+router.post("/create-phrase", dashboard.createPhrase);
+router.get("/get-phrases", dashboard.getPhrases);
 
 export default router;

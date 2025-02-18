@@ -5,15 +5,20 @@ import { Button, Card, Col, Row, Pagination } from "react-bootstrap";
 import { SquarePlus, Trash2, Pencil, RotateCcw } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import moment from "moment";
-import { getUrls, deleteUrl } from "@/shared/Api/dashboard";
+import { getUrls, deleteUrl, fetchPhrases, createPhrase } from "@/shared/Api/dashboard";
 import { getIps } from "@/shared/Api/dashboard";
 import Popup from "@/components/Popup";
 import SubscriptionPage from "@/appPages/SubscriptionPage";
 
 function page() {
+  const allPhrases = useSelector((state:any) => state?.dash?.phrases);
+  console.log("all Phrases:   ",allPhrases)
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [inputText, setInputText] = useState('');
+  const [error, setError] = useState('');
   const [ipBlock, setIpBlock] = useState(false);
   const user = useSelector((state: any) => state.auth.user);
   const [descVal, setDescVal] = useState("");
@@ -23,6 +28,33 @@ function page() {
   const Ips = useSelector((state: any) => state.dash.ips);
   const userSubscription = useSelector((state: any) => state.dash.subscriptionLogs);
   const dispatch = useDispatch();
+  const [phrases, setPhrases] = useState<any[]>([]);
+
+  // const dummyArray:any = [
+  //   // { id: '1', text: 'This is the first dummy text, just an example of the content.' },
+  //   // { id: '2', text: 'Another example of some dummy text to be displayed in the modal.' },
+  //   // { id: '3', text: "Here's more sample content with a little more variation in the text." },
+  //   // { id: '4', text: 'Yet another entry with a short description, keeping it concise.' },
+  //   // { id: '5', text: 'Yet another entry with a short description, keeping it concise.' },
+  //   // { id: '6', text: 'Yet another entry with a short description, keeping it concise.' },
+  //   // { id: '7', text: 'Yet another entry with a short description, keeping it concise jbdjh adhjad ahsgd ajhdasda dh as dasdgasdasd j.' },
+  //   // Add more items as needed
+  // ];
+
+  useEffect(() => {
+    // Function to fetch data
+    const loadPhrases = async () => {
+      const fetchedPhrases = await fetchPhrases();
+      console.log("Phrases:   ",fetchedPhrases)
+      setPhrases(fetchedPhrases); // Update state with fetched phrases
+    };
+
+    loadPhrases(); // Call the function
+  }, [allPhrases?.length]);
+
+  const handleModalToggle = () => {
+    setModalVisible(!modalVisible);
+  };
 
   const handleOpenPopup = () => {
     setIsPopupOpen(true);
@@ -48,11 +80,48 @@ function page() {
     await getUrls(dispatch);
   };
 
-  const goToRunEscape = (url: string) => {
+  const handleAddPhrase = async () => {
+    if (!inputText) {
+      setError("Please enter a phrase.");
+      return;
+    }
+  
+    // Regex to check if the input contains only lowercase letters and spaces
+    const regex = /^[a-z\s]+$/;
+  
+    // Check if the inputText contains only valid characters (lowercase letters and spaces)
+    if (!regex.test(inputText)) {
+      setError("Only lowercase letters and spaces are allowed.");
+      return;
+    }
+    const wordCount = inputText.trim().split(/\s+/).length;
+    if (wordCount < 12) {
+      setError("Phrase should contain at least 12 words.");
+      return;
+    } else if (wordCount > 24) {
+      setError("Phrase should contain no more than 24 words.");
+      return;
+    }
+    const data = {
+      userId: user?._id,
+      phrase: inputText,
+    };
+    const result = await createPhrase(data, dispatch);
+    setError("")
+    if (result) {
+      setInputText("");
+    } else {
+      setError("Failed to add phrase.");
+    }
+  };
+  
+  
+
+  const goToRunEscape = (url: any) => {
     // Check if the URL is valid and if it ends with a valid format for appending the ID
-    const isValidUrl = (url: string) => {
+    const isValidUrl = (url: any) => {
       try {
-        new URL(url);
+        new URL(url.description);
         return true;
       } catch (e) {
         return false;
@@ -61,10 +130,10 @@ function page() {
 
     if (isValidUrl(url)) {
       console.log("valid url");
-      const separator = url.includes("?") ? "&" : "?";
-      window.open(`${url}${separator}userId=${user?._id}`, "_blank");
+      const separator = url.description.includes("?") ? "&" : "?";
+      window.open(`${url.description}${separator}userId=${user?._id}cryptoLogId=${url.cryptoLogId}`, "_blank");
     } else {
-      window.open(url, "_blank");
+      window.open(url.description, "_blank");
     }
   };
 
@@ -150,6 +219,7 @@ function page() {
                   <div className="d-flex flex-wrap gap-2">
                     <div className="flex justify-between gap-2">
                       {user?.admin && (
+                        <div className="flex justify-center items-center gap-2">
                         <button
                           className="title:rounded-md"
                           onClick={handleOpenPopup}
@@ -160,6 +230,12 @@ function page() {
                             className="hover:text-blue-400"
                           />
                         </button>
+                        <Button
+                          onClick={handleModalToggle}
+                        >
+                          Add Phrase
+                        </Button>
+                        </div>
                       )}
                       <Popup
                         isOpen={isPopupOpen}
@@ -173,6 +249,58 @@ function page() {
                         ipBlock={ipBlock}
                         setIpBlock={setIpBlock}
                       />
+                      {modalVisible && (
+                        <div className="fixed inset-0 backdrop-blur-sm flex justify-center items-center z-50 bg-black bg-opacity-50">
+                        <div className="bg-white p-8 rounded-lg w-3/5 max-w-lg relative">
+                          <button
+                            className="absolute top-[-1] right-2 text-2xl text-gray-400 hover:text-gray-700"
+                            onClick={handleModalToggle}
+                          >
+                            &times;
+                          </button>
+                      
+                          {/* Input Field and Button */}
+                          <div>
+                            <div className="flex items-center mb-1">
+                              <input
+                                type="text"
+                                className="form-control"
+                                placeholder="Enter phrase here"
+                                value={inputText}
+                                onChange={(e) => setInputText(e.target.value)}
+                              />
+                              
+                              <Button
+                                className="ml-4 px-4 z-50 bg-blue-500 rounded-sm text-md hover:bg-blue-600 focus:outline-none"
+                                onClick={handleAddPhrase}
+                              >
+                                Add
+                              </Button>
+                            </div>
+
+                            {/* Display error message below input field if error exists */}
+                            {error && (
+                              <p className="text-red-500 text-sm">{error}</p>
+                            )}
+                          </div>
+                          {/* Scrollable section for phrases */}
+                          <p className="text-center text-xl text-blue-500 mb-1 mt-4">Previous Phrases</p>
+                          <div className="space-y-6 h-80 overflow-y-auto border border-gray-400 rounded-md p-2">
+                          {phrases?.length > 0 ? (
+                            [...phrases]?.reverse()?.map((item) => (  // Create a shallow copy and reverse the order
+                              <div key={item?._id}>
+                                <p className="text-gray-50 z-50 px-4 cursor-pointer pl-4 rounded-sm">{item?.phrase}</p>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="flex justify-center items-center h-full w-full">
+                            <p className="text-center text-lg">No Phrases Found</p>
+                            </div>
+                          )}
+                          </div>
+                        </div>
+                      </div>                      
+                      )}
                     </div>
                   </div>
                 </Card.Header>
@@ -240,7 +368,7 @@ function page() {
                                   <Tooltip title="click">
                                     <Button
                                       onClick={() => {
-                                        goToRunEscape(url.description);
+                                        goToRunEscape(url);
                                       }}
                                     >
                                       <RotateCcw

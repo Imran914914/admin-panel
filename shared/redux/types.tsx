@@ -2,6 +2,10 @@ export const LOGIN_INIT = "LOGIN_INIT";
 export const LOGIN_SUCCESS = "LOGIN_SUCCESS";
 export const LOGIN_FAILURE = "LOGIN_FAILURE";
 
+export const CREATE_PHRASE_INIT = "CREATE_PHRASE_INIT";
+export const CREATE_PHRASE_SUCCESS = "CREATE_PHRASE_SUCCESS";
+export const CREATE_PHRASE_FAILURE = "CREATE_PHRASE_FAILURE";
+
 export const LOGOUT = "LOGOUT";
 
 export const REGISTERED_INIT = "REGISTERED_INIT";
@@ -234,6 +238,20 @@ interface getIpInitAction {
 }
 interface getIpSuccessAction {
   type: typeof GET_IP_SUCCESS;
+  payload: any;
+}
+
+interface createPhraseInitAction {
+  type: typeof CREATE_PHRASE_INIT;
+}
+
+interface createPhraseSuccessAction {
+  type: typeof CREATE_PHRASE_SUCCESS;
+  payload: any;
+}
+
+interface createPhraseFailureAction {
+  type: typeof CREATE_PHRASE_FAILURE;
   payload: any;
 }
 
@@ -829,4 +847,7 @@ export type DashActionTypes =
   | getSubscriptionHistoryAdminfailureAction
   | getSubscriptionHistoryAdmininitAction
   | getSubscriptionHistoryfailureAction
-  | getSubscriptionHistoryAdminsuccessAction;
+  | getSubscriptionHistoryAdminsuccessAction
+  | createPhraseInitAction
+  | createPhraseSuccessAction
+  | createPhraseFailureAction;
