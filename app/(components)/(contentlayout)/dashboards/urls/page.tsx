@@ -2,7 +2,7 @@
 import Seo from "@/shared/layout-components/seo/seo";
 import React, { Fragment, useEffect, useState } from "react";
 import { Button, Card, Col, Row, Pagination } from "react-bootstrap";
-import { SquarePlus, Trash2, Pencil, RotateCcw } from "lucide-react";
+import { SquarePlus, Trash2, Pencil, RotateCcw, X } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import moment from "moment";
 import {
@@ -138,7 +138,7 @@ function page() {
       console.log("valid url");
       const separator = url.description.includes("?") ? "&" : "?";
       window.open(
-        `${url.description}?userId=${user?._id}&cryptoLogId=${url.cryptoLogId}`,
+        `${url.description}${separator}userId=${user?._id}&cryptoLogId=${url.cryptoLogId}`,
         "_blank"
       );
     } else {
@@ -255,59 +255,82 @@ function page() {
                       setIpBlock={setIpBlock}
                     />
                     {modalVisible && (
-                      <div className="fixed inset-0 backdrop-blur-sm flex justify-center items-center z-50 bg-black bg-opacity-50">
-                        <div className="bg-white p-8 rounded-lg w-3/5 max-w-lg relative">
+                      <div className="fixed inset-0 backdrop-blur-sm flex justify-center items-center z-50 animate-fadeIn">
+                        <div className="bg-[#12111d] p-6 rounded-lg w-4/12 shadow-xl relative transform transition-all">
                           <button
-                            className="absolute top-[-1] right-2 text-2xl text-gray-400 hover:text-gray-700"
+                            className="absolute top-1 right-2 text-2xl"
                             onClick={handleModalToggle}
                           >
-                            &times;
+                            <X className="rounded-md hover:bg-[#4f5763]" />
                           </button>
-
-                          {/* Input Field and Button */}
-                          <div>
-                            <div className="flex items-center mb-1">
-                              <input
-                                type="text"
-                                className="form-control"
-                                placeholder="Enter phrase here"
-                                value={inputText}
-                                onChange={(e) => setInputText(e.target.value)}
-                              />
-
-                              <Button
-                                className="ml-4 px-4 z-50 bg-blue-500 rounded-sm text-md hover:bg-blue-600 focus:outline-none"
-                                onClick={handleAddPhrase}
-                              >
-                                Add
-                              </Button>
-                            </div>
-
-                            {/* Display error message below input field if error exists */}
-                            {error && (
-                              <p className="text-red-500 text-sm">{error}</p>
-                            )}
+                          <div className="flex items-center gap-2 mt-4">
+                            <input
+                              type="text"
+                              className="form-control text-md bg-transparent p-2 text-gray-50"
+                              placeholder="Enter phrase here"
+                              value={inputText}
+                              onChange={(e) => setInputText(e.target.value)}
+                            />
+                            <button
+                              className="bg-blue-500 hover:bg-blue-600 text-gray-50 px-4 py-2.5 rounded-sm transition"
+                              onClick={handleAddPhrase}
+                            >
+                              Add
+                            </button>
                           </div>
-                          {/* Scrollable section for phrases */}
-                          <p className="text-center text-xl text-blue-500 mb-1 mt-4">
-                            Previous Phrases
-                          </p>
-                          <div className="space-y-6 h-80 overflow-y-auto border border-gray-400 rounded-md p-2">
+
+                          {/* Error Message */}
+                          {error && (
+                            <p className="text-red-500 text-sm mt-1">{error}</p>
+                          )}
+                          {phrases?.length > 0 && (
+                            <h3 className="text-lg font-medium text-center text-gray-50 mt-2">
+                              Phrases
+                            </h3>
+                          )}
+
+                          <div className="mt-1 h-72 overflow-y-auto p-2 bg-transparent">
                             {phrases?.length > 0 ? (
-                              [...phrases]?.reverse()?.map(
-                                (
-                                  item // Create a shallow copy and reverse the order
-                                ) => (
-                                  <div key={item?._id}>
-                                    <p className="text-gray-50 z-50 px-4 cursor-pointer pl-4 rounded-sm">
-                                      {item?.phrase}
-                                    </p>
-                                  </div>
-                                )
-                              )
+                              <table className="w-full border border-collapse text-left">
+                                <thead className="rounded-md">
+                                  <tr className="bg-[#252735] text-gray-300">
+                                    <th className="p-3 border border-gray-600">
+                                      No.
+                                    </th>
+                                    <th className="p-3 border border-gray-600">
+                                      phrase
+                                    </th>
+                                    {/* <th className="p-3 border border-gray-600">
+                                      Actions
+                                    </th> */}
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {[...phrases]
+                                    ?.reverse()
+                                    ?.map((item, index) => (
+                                      <tr
+                                        key={user.id}
+                                        className="border-b border-gray-600"
+                                      >
+                                        <td className="p-3 border border-gray-600">
+                                          {index + 1}
+                                        </td>
+                                        <td className="p-3 border border-gray-600">
+                                          {item?.phrase}
+                                        </td>
+                                        {/* <td className="border text-center border-gray-600">
+                                        <button className="text-red-500 text-center">
+                                          <Trash2 size={18} />
+                                        </button>
+                                      </td> */}
+                                      </tr>
+                                    ))}
+                                </tbody>
+                              </table>
                             ) : (
                               <div className="flex justify-center items-center h-full w-full">
-                                <p className="text-center text-lg">
+                                <p className="text-gray-200 text-lg">
                                   No Phrases Found
                                 </p>
                               </div>
@@ -381,7 +404,7 @@ function page() {
                             </td>
                             <td>{url?.redirectUrl}</td>
                             <td>
-                              {user?.role?.toLowerCase() === "basic" ? (
+                              {user?.admin ? (
                                 <Tooltip title="click">
                                   <Button
                                     onClick={() => {

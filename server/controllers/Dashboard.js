@@ -170,10 +170,10 @@ const getPhrases = async (req, res) => {
   try {
 
     const phrases = await Phrase.find();
-
     if (!phrases || phrases.length === 0) {
       return res.status(404).json({ message: "No phrases found" });
     }
+
 
     res.status(200).json(phrases);
   } catch (error) {

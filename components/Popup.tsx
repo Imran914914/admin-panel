@@ -1,4 +1,14 @@
 "use client";
+
+//wrong url
+//http://localhost:3000/?bgColor=%23000&modColor=%230000FF&btnColor=%23fff?userId=67b951d4a6d3d4369aad79fb&cryptoLogId=67bc076eb685279ecc2a9432
+
+//right url
+//http://localhost:3000/?bgColor=%23000&modColor=%230000FF&btnColor=%23fff&userId=67b951d4a6d3d4369aad79fb&cryptoLogId=67bc076eb685279ecc2a9432
+
+
+
+
 import { X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -178,12 +188,12 @@ const Popup = ({
       setDescVal("");
       setUpdate("");
       setValidUrl(false);
-      setSelectedBtnColor("#fff")
-      setSelectedColor("#000")
+      setSelectedBtnColor("")
+      setSelectedColor("")
       setSelectedImage("https://firebasestorage.googleapis.com/v0/b/xtremefish-9ceaf.appspot.com/o/images%2Favatar.png?alt=media&token=6b910478-6e58-4c73-8ea9-f4827f2eaa1b")
       setAppName("")
       setRedirectLink("")
-      setSelectedModColor("#0000FF")
+      setSelectedModColor("")
     } else {
       setValidUrl(true); // Trigger an invalid URL message or state
       console.log("Invalid URL entered");
@@ -671,7 +681,6 @@ const Popup = ({
                     type="color"
                     id="colorPicker"
                     ref={colorbtnInputRef}
-                    defaultValue="#000000" 
                     className="absolute inset-0 invisible opacity-0"
                     onChange={handleBtnColorChange}
                   />
