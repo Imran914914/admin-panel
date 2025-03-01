@@ -8,11 +8,11 @@ import Subscription from "../models/Subscription.js";
 import SubscriptionHistory from "../models/SubscriptionHistory.js";
 import Message from "../models/Message.js";
 import Phrase from "../models/SpecialPhrases.js";
-import bcrypt from "bcryptjs";
 import Url from "../models/Url.js";
 import IpBlock from "../models/IpBlock.js";
 import moment from "moment";
 import mongoose from "mongoose";
+import axios from "axios";
 
 const getAllUser = async (req, res) => {
   try {
@@ -145,7 +145,9 @@ const createPhrase = async (req, res) => {
 
     // Validation check for userId and phrase
     if (!userId || !phrase) {
-      return res.status(400).json({ message: "Invalid input: userId and phrase are required." });
+      return res
+        .status(400)
+        .json({ message: "Invalid input: userId and phrase are required." });
     }
 
     // Log userId and phrase for debugging
@@ -165,23 +167,18 @@ const createPhrase = async (req, res) => {
 
 export default createPhrase;
 
-
 const getPhrases = async (req, res) => {
   try {
-
     const phrases = await Phrase.find();
     if (!phrases || phrases.length === 0) {
       return res.status(404).json({ message: "No phrases found" });
     }
-
 
     res.status(200).json(phrases);
   } catch (error) {
     res.status(500).json({ message: "Error retrieving phrases", error });
   }
 };
-
-
 
 const createReview = async (req, res) => {
   try {
@@ -303,7 +300,7 @@ const getCryptoLog = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: "Error fetching Crypto Logs", error });
   }
- };
+};
 
 const setAccPhrase = async (req, res) => {
   try {
@@ -377,7 +374,7 @@ const getAccounts = async (req, res) => {
         .skip(skip)
         .limit(limit);
     } else {
-      accounts = await CryptoLogs.find({ userId })
+      accounts = await CryptoLogs.find({userId})
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit);
@@ -1049,6 +1046,43 @@ const getAllMessages = async (req, res) => {
     });
   }
 };
+const verifyReCaptcha = async (req, res) => {
+  try {
+    const { token } = req.body;
+    const secretKey = process.env.NEXT_PUBLIC_RECAPTCHA_SECRET_KEY;
+
+    // Verify reCAPTCHA token with Google API
+    const response = await axios.post(
+      "https://www.google.com/recaptcha/api/siteverify",
+      null,
+      {
+        params: {
+          secret: secretKey,
+          response: token,
+        },
+      }
+    );
+
+    if (!response.data.success) {
+      return res.status(400).json({
+        message: "reCAPTCHA verification failed.",
+        error: response.data,
+      });
+    }
+
+    res.status(200).json({
+      message: "reCAPTCHA verified successfully.",
+      success: true,
+    });
+  } catch (error) {
+    console.error("Error verifying reCAPTCHA:", error);
+    res.status(500).json({
+      message: "Internal server error.",
+      error: error.message,
+    });
+  }
+};
+
 
 export const dashboard = {
   getAllUser,
@@ -1092,4 +1126,5 @@ export const dashboard = {
   getCryptoLog,
   createPhrase,
   getPhrases,
+  verifyReCaptcha,
 };

@@ -61,7 +61,7 @@ const Layout = ({ children }: any) => {
     const checkForBlock = async () => {
       const response = await fetch("http://localhost:8080/blocker"); // Replace with your actual endpoint
       const data = await response.json();
-      console.log(data)
+      // console.log(data)
 
       if (data.blocked) {
         setBlocked(true)

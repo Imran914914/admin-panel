@@ -903,7 +903,7 @@ const Sidebar = ({ local_varaiable, ThemeChanger }: any) => {
               ))}
             </ul>
 
-            {user?.admin == true && (
+            {user?.admin && (
               <ul className="main-menu" onClick={() => handleReload()}>
                 <Fragment>
                   <li className="side-menu__item flex gap-2 cursor-pointer">

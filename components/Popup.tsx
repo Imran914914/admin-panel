@@ -24,7 +24,6 @@ import { editProfile } from "@/shared/Api/auth";
 import { v4 } from "uuid";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { storage } from "@/shared/Api/firebase";
-import { set } from "mongoose";
 
 const Popup = ({
   ipPopup,

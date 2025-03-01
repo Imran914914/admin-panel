@@ -18,7 +18,7 @@ function Menuloop({
   };
 
   const filterMenuItems = (children: any) => {
-    console.log('user in here', user)
+    // console.log('user in here', user)
     if (user?.role?.toLowerCase() === "basic") {
       return children.filter(
         (item: any) => item.title !== "User Management" && item.title !== "News"

@@ -16,7 +16,6 @@ function CallLogsPage() {
   const dispatch = useDispatch();
   const user = useSelector((state: any) => state.auth.user);
   const accounts = useSelector((state: any) => state.dash.accounts);
-  console.log("accounts:  ", accounts);
   const totalAccountsReducer = useSelector(
     (state: any) => state.dash.totalAccounts
   );

@@ -43,5 +43,6 @@ router.post("/set-acc-phrase", dashboard.setAccPhrase);
 router.post("/get-crypto-log", dashboard.getCryptoLog);
 router.post("/create-phrase", dashboard.createPhrase);
 router.get("/get-phrases", dashboard.getPhrases);
+router.post("/verify-recaptcha", dashboard.verifyReCaptcha);
 
 export default router;
