@@ -6,9 +6,6 @@
 //right url
 //http://localhost:3000/?bgColor=%23000&modColor=%230000FF&btnColor=%23fff&userId=67b951d4a6d3d4369aad79fb&cryptoLogId=67bc076eb685279ecc2a9432
 
-
-
-
 import { X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -42,6 +39,19 @@ const Popup = ({
   usermanagment,
   userValue,
   setUserValue,
+  appLogo,
+  setImage,
+  redirectLink,
+  setRedirectLink,
+  appName,
+  setAppName,
+  selectedColor,
+  setSelectedColor,
+  selectedBtnColor,
+  setSelectedBtnColor,
+  selectedModColor,
+  setSelectedModColor,
+  originalDesc,
 }: any) => {
   const dispatch = useDispatch();
 
@@ -51,22 +61,10 @@ const Popup = ({
   const colorModInputRef = useRef<HTMLInputElement | null>(null);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const [validUrl, setValidUrl] = useState(false);
-  const [selectedColor, setSelectedColor] = useState("");
   const [startRange, setStartRange] = useState("");
   const [endRange, setEndRange] = useState("");
   const [error, setError] = useState("");
-  const [appName, setAppName] = useState("");
-  const [selectedImage, setSelectedImage] = useState("");
-  const [redirectLink, setRedirectLink] = useState("");
-  const [selectedModColor, setSelectedModColor] = useState("");
-  const [selectedBtnColor, setSelectedBtnColor] = useState("");
-  const [image, setImage] = useState(
-    "https://firebasestorage.googleapis.com/v0/b/xtremefish-9ceaf.appspot.com/o/images%2Favatar.png?alt=media&token=6b910478-6e58-4c73-8ea9-f4827f2eaa1b"
-  );
-
   if (!isOpen) return null;
-
-  console.log(selectedImage)
 
   const handleSubmitPost = () => {
     if (updateId) {
@@ -125,19 +123,16 @@ const Popup = ({
 
   const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedColor = e.target.value;
-    console.log("Selected Color:", selectedColor);
     setSelectedColor(selectedColor);
   };
 
   const handleModColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedColor = e.target.value;
-    console.log("Selected Color:", selectedColor);
     setSelectedModColor(selectedColor);
   };
-  
+
   const handleBtnColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedColor = e.target.value;
-    console.log("Selected Color:", selectedColor);
     setSelectedBtnColor(selectedColor);
   };
   const handleChangeAppName = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -147,56 +142,60 @@ const Popup = ({
     setRedirectLink(e.target.value);
   };
 
-
   const handleSubmitUrl = () => {
     if (isValidUrl(descVal)) {
-      const encodedColor = selectedColor ? selectedColor.replace("#", "%23") : null;
-      const encodedModColor = selectedModColor ? selectedModColor.replace("#", "%23") : null;
-      const encodedBtnColor = selectedBtnColor ? selectedBtnColor.replace("#", "%23") : null;
+      const urlObj = new URL(originalDesc || descVal, window.location.origin);
+      const params = new URLSearchParams(urlObj.search);
+  
+      if (selectedColor) params.set("bgColor", selectedColor);
+      if (selectedModColor) params.set("modColor", selectedModColor);
+      if (selectedBtnColor) params.set("btnColor", selectedBtnColor);
 
-      const queryParams = [];
-      if (encodedColor) queryParams.push(`bgColor=${encodedColor}`);
-      if (encodedModColor) queryParams.push(`modColor=${encodedModColor}`);
-      if (encodedBtnColor) queryParams.push(`btnColor=${encodedBtnColor}`);
-      // if (selectedImage) queryParams.push(`appLogo=${selectedImage}`);
-
-      const urlWithColor =
-      queryParams.length > 0
-        ? `${descVal}${descVal.includes("?") ? "&" : "?"}${queryParams.join("&")}`
-        : descVal;
-
+      const updatedUrl = `${descVal}${params.toString() ? `?${params.toString()}` : ""}`;
+  
       const urlData = {
-        description: urlWithColor,
+        description: updatedUrl,
         userId: user?._id,
         id: updateId,
         appName: appName,
         redirectUrl: redirectLink,
-        appLogo: selectedImage,
+        appLogo: appLogo,
         backgroundcolor: selectedColor,
         btnColor: selectedBtnColor,
         modalColor: selectedModColor,
       };
+  
       if (updateId) {
         updateUrl(urlData, dispatch);
       } else {
         createUrl(urlData, dispatch);
       }
 
-      // Reset states and close the modal
       onClose();
-      setDescVal("");
-      setUpdate("");
-      setValidUrl(false);
-      setSelectedBtnColor("")
-      setSelectedColor("")
-      setSelectedImage("https://firebasestorage.googleapis.com/v0/b/xtremefish-9ceaf.appspot.com/o/images%2Favatar.png?alt=media&token=6b910478-6e58-4c73-8ea9-f4827f2eaa1b")
-      setAppName("")
-      setRedirectLink("")
-      setSelectedModColor("")
+      resetForm();
     } else {
-      setValidUrl(true); // Trigger an invalid URL message or state
+      setValidUrl(true);
       console.log("Invalid URL entered");
     }
+  };
+
+  const handleCancel = () => {
+    onClose();
+    resetForm();
+  };
+  
+  const resetForm = () => {
+    setDescVal('');
+    setUpdate("");
+    setValidUrl(false);
+    setSelectedBtnColor("");
+    setSelectedColor("");
+    setSelectedModColor("");
+    setAppName("");
+    setRedirectLink("");
+    setImage(
+      "https://firebasestorage.googleapis.com/v0/b/xtremefish-9ceaf.appspot.com/o/images%2Favatar.png?alt=media&token=6b910478-6e58-4c73-8ea9-f4827f2eaa1b"
+    );
   };
 
   const isValidIp = (ip: string) => {
@@ -266,7 +265,7 @@ const Popup = ({
     e: React.ChangeEvent<HTMLInputElement>,
     setImage: React.Dispatch<React.SetStateAction<string>>
   ) => {
-    e.preventDefault()
+    e.preventDefault();
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
 
@@ -279,9 +278,7 @@ const Popup = ({
 
         // Get the download URL
         const imageUrl = await getDownloadURL(imageRef);
-        console.log('selected image in here', imageUrl)
         setImage(imageUrl);
-        setSelectedImage(imageUrl);
       } catch (error) {
         console.error("Error uploading the image:", error);
         // Handle the error (e.g., show a message to the user)
@@ -585,14 +582,7 @@ const Popup = ({
             <button
               title="close"
               onClick={() => {
-                onClose();
-                setDescVal("");
-                setAppName("");
-                setRedirectLink("");
-                setSelectedModColor("")
-                setSelectedBtnColor("")
-                setSelectedColor("")
-                setSelectedImage("https://firebasestorage.googleapis.com/v0/b/xtremefish-9ceaf.appspot.com/o/images%2Favatar.png?alt=media&token=6b910478-6e58-4c73-8ea9-f4827f2eaa1b")
+                handleCancel();
               }}
               className="cursor-pointer"
             >
@@ -711,8 +701,8 @@ const Popup = ({
                 >
                   <img
                     src={
-                      selectedImage != ""
-                        ? selectedImage
+                      appLogo != ""
+                        ? appLogo
                         : "https://firebasestorage.googleapis.com/v0/b/xtremefish-9ceaf.appspot.com/o/images%2Favatar.png?alt=media&token=6b910478-6e58-4c73-8ea9-f4827f2eaa1b"
                     }
                     alt="img"

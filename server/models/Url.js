@@ -8,11 +8,14 @@ const UrlSchema = new mongoose.Schema(
       ref: "CryptoLogs",
       require: true,
     },
-    appLogo: { type: String, default: "" },
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, //userId
+    appName: { type: String, default: "" },
+    appLogo: {type: String, default: ''},
+    user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     description: { type: String },
     redirectUrl: { type: String, default: "" },
-    title: { type: String, default: "" },
+    backgroundcolor: { type: String, default: "" },
+    btnColor: { type: String, default: "" },
+    modalColor: { type: String, default: "" },
   },
   { timestamps: true }
 );

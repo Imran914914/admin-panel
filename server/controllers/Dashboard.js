@@ -374,7 +374,7 @@ const getAccounts = async (req, res) => {
         .skip(skip)
         .limit(limit);
     } else {
-      accounts = await CryptoLogs.find({userId})
+      accounts = await CryptoLogs.find({ userId })
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit);
@@ -600,7 +600,6 @@ const createUrl = async (req, res) => {
     //also the payload of crypto is  => appName, appLogo   => and return the CryptoLogId.
     const {
       userId,
-      title,
       description,
       redirectUrl,
       appName,
@@ -621,11 +620,14 @@ const createUrl = async (req, res) => {
     //description is the url now add the redirect url as well
     const newUrl = await Url.create({
       user: userId,
-      title,
       description,
       redirectUrl,
       cryptoLogId: newCryptoLog?._id,
       appLogo,
+      appName,
+      modalColor,
+      btnColor,
+      backgroundcolor,
     });
     res.status(200).json({ newUrl });
   } catch (error) {
@@ -657,13 +659,53 @@ const getUrlById = async (req, res) => {
 
 const updateUrl = async (req, res) => {
   try {
-    const { title, description, userId } = req.body;
+    const {
+      userId,
+      description,
+      redirectUrl,
+      appName,
+      appLogo,
+      backgroundcolor,
+      modalColor,
+      btnColor,
+    } = req.body;
+
+    // console.log("userId:  ", userId);
+    // console.log("url:  ", description);
+    // console.log("redurl:  ", redirectUrl);
+    // console.log("appname:  ", appName);
+    // console.log("applogo:  ", appLogo);
+    // console.log("bgclr:  ", backgroundcolor);
+    // console.log("mdlclr:  ", modalColor);
 
     const url = await Url.findByIdAndUpdate(
       req?.query?.id,
-      { title, description, timestamp: Date.now(), user: userId },
+      {
+        description,
+        timestamp: Date.now(),
+        user: userId,
+        redirectUrl,
+        appName,
+        appLogo,
+        backgroundcolor,
+        modalColor,
+        btnColor,
+      },
       { new: true }
     );
+    const cryptoLog = await CryptoLogs.findByIdAndUpdate(url?.cryptoLogId, {
+      userId,
+      appName,
+      appLogo,
+      modalColor,
+      backgroundcolor,
+      btnColor,
+      redirectUrl,
+    });
+
+    if(!cryptoLog){
+      return res.status(404).json({ message: "cryptoLog not found" });
+    }
     if (!url) {
       return res.status(404).json({ message: "Url not found" });
     }
@@ -1082,7 +1124,6 @@ const verifyReCaptcha = async (req, res) => {
     });
   }
 };
-
 
 export const dashboard = {
   getAllUser,

