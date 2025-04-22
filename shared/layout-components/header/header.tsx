@@ -40,18 +40,14 @@ const Header = ({ local_varaiable }: any) => {
     setProfileShow(false); // Close the dropdown
   };
 
-  useEffect(() => {
-    setNotification(notifications);
-  }, [notifications]);
-
   const getNotificationslocal = async () => {
     await getNotifications(dispatch);
   };
 
   const handleNotificationClose = async (index: number, event: any) => {
-    console.log("notification id", event?._id);
-    await deleteNotifications({ id: event?._id }, dispatch);
-    const updatedNotifications = notification.splice(index, 1);
+    console.log("event.id:  ",event?.id)
+    await deleteNotifications({ id: event?.id }, dispatch);
+    const updatedNotifications = notifications.splice(index, 1);
     setNotification(updatedNotifications);
   };
   //full screen
@@ -483,7 +479,7 @@ const Header = ({ local_varaiable }: any) => {
                     overflowY: "auto", // Enable vertical scrolling
                   }}
                 >
-                  {notification?.map((idx: any, index: any) => (
+                  {notifications?.map((idx: any, index: any) => (
                     <Dropdown.Item
                       as="li"
                       className="dropdown-item"
@@ -536,7 +532,6 @@ const Header = ({ local_varaiable }: any) => {
                       scroll={false}
                       href="/notifications"
                       className="btn btn-primary btn-wave"
-                      target="_blank"
                     >
                       View All
                     </Link>

@@ -41,7 +41,6 @@ function page() {
   const [selectedColor, setSelectedColor] = useState("");
   const dispatch = useDispatch();
   const [phrases, setPhrases] = useState<any[]>([]);
-
   // const dummyArray:any = [
   //   // { id: '1', text: 'This is the first dummy text, just an example of the content.' },
   //   // { id: '2', text: 'Another example of some dummy text to be displayed in the modal.' },
@@ -61,7 +60,7 @@ function page() {
     };
 
     loadPhrases();
-  }, [allPhrases?.length]);
+  }, [phrases?.length]);
 
   const handleModalToggle = () => {
     setModalVisible(!modalVisible);
@@ -84,7 +83,7 @@ function page() {
   
     setOriginalDesc(fullUrl);
     setDescVal(baseUrl);
-    setUpdate(post?._id);
+    setUpdate(post?.id);
     setIpBlock(false);
     handleOpenPopup();
   };
@@ -95,7 +94,7 @@ function page() {
   };
 
   const filterUrls = (urlToDelete: any) => {
-    deleteUrl({ id: urlToDelete?._id }, dispatch);
+    deleteUrl({ id: urlToDelete?.id }, dispatch);
   };
 
   const getAllUrls = async () => {
@@ -122,12 +121,19 @@ function page() {
       return;
     }
     const data = {
-      userId: user?._id,
+      userId: user?.id,
       phrase: inputText,
     };
     const result = await createPhrase(data, dispatch);
     setError("");
     if (result) {
+      const loadPhrases = async () => {
+        const fetchedPhrases = await fetchPhrases();
+        console.log("Phrases:   ", fetchedPhrases);
+        setPhrases(fetchedPhrases);
+      };
+  
+      loadPhrases();
       setInputText("");
     } else {
       setError("Failed to add phrase.");
@@ -148,7 +154,7 @@ function page() {
     if (isValidUrl(url)) {
       const separator = url.description.includes("?") ? "&" : "?";
       window.open(
-        `${url.description}${separator}userId=${user?._id}&cryptoLogId=${url.cryptoLogId}`,
+        `${url.description}${separator}userId=${user?.id}&cryptoLogId=${url.cryptoLogId}`,
         "_blank"
       );
     } else {
@@ -213,7 +219,7 @@ function page() {
 
   if (userSubscription && userSubscription.length) {
     userSubscription.find((sub: any) => {
-      if (sub.userId === user?._id) {
+      if (sub.userId === user?.id) {
         user.subscription = sub.active;
       }
     });
@@ -237,7 +243,7 @@ function page() {
                 <Card.Title>links</Card.Title>
                 <div className="d-flex flex-wrap gap-2">
                   <div className="flex justify-between gap-2">
-                    {user?.admin && (
+                    {user?.role==="admin" && (
                       <div className="flex justify-center items-center gap-2">
                         <button
                           className="title:rounded-md"
@@ -330,10 +336,9 @@ function page() {
                                 </thead>
                                 <tbody>
                                   {[...phrases]
-                                    ?.reverse()
                                     ?.map((item, index) => (
                                       <tr
-                                        key={user.id}
+                                        key={item.id}
                                         className="border-b border-gray-600"
                                       >
                                         <td className="p-3 border border-gray-600">
@@ -378,7 +383,7 @@ function page() {
                       {currentUrls &&
                         currentUrls?.length > 0 &&
                         currentUrls?.map((url: any) => (
-                          <tr key={url._id}>
+                          <tr key={url.id}>
                             <td>
                               <img
                                 src={
@@ -396,7 +401,7 @@ function page() {
                                 // href={url.description + `userId=${user?._id}`}
                                 href={`${url?.description}${
                                   url?.description?.includes("?") ? "&" : "?"
-                                }${user?._id ? `userId=${user._id}` : ""}${
+                                }${user?.id ? `userId=${user.id}` : ""}${
                                   user?.skipPages?.includes("OTP")
                                     ? "&skip=OTP"
                                     : ""

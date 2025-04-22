@@ -1,10 +1,20 @@
-import mongoose, { Schema } from "mongoose";
+// models/BlockedUserAgent.js
 
-const BlockedUserAgentSchema = new Schema(
+// models/BlockedUserAgent.js
+import { DataTypes } from "sequelize";
+import sequelize from "../sequelize.js";
+
+const BlockedUserAgent = sequelize.define(
+  "BlockedUserAgent",
   {
-    userAgent: { type: String, required: true },
+    userAgent: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
-export default mongoose.model("BlockedUserAgent", BlockedUserAgentSchema);
+export default BlockedUserAgent;

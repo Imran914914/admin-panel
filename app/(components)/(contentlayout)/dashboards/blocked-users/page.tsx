@@ -2,7 +2,7 @@
 import Seo from "@/shared/layout-components/seo/seo";
 import React, { Fragment, useEffect, useState } from "react";
 import { Button, Card, Col, Row, Pagination, Dropdown } from "react-bootstrap";
-import { SquarePlus, Trash2, Pencil } from 'lucide-react';
+import { SquarePlus, Trash2, Pencil } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import moment from "moment";
 import { deleteIp, getIps } from "@/shared/Api/dashboard";
@@ -30,7 +30,7 @@ function Page() {
     setIsPopupOpen(true);
     setIpPopup(true);
   };
-// console.log('ips in here brother', Ips)
+  // console.log('ips in here brother', Ips)
   // console.log(Ips[0].ip)
 
   const handleClosePopup = () => {
@@ -38,19 +38,15 @@ function Page() {
   };
 
   const filterIps = (ipToDelete: any) => {
-    deleteIp({ id: ipToDelete?._id }, dispatch);
+    deleteIp({ id: ipToDelete?.id }, dispatch);
   };
 
   const handleDeleteSelectedAccounts = async () => {
-    await Promise.all(
-      selectedAccounts.map((id) => deleteIp({ id }, dispatch))
-    );
+    await Promise.all(selectedAccounts.map((id) => deleteIp({ id }, dispatch)));
     setSelectedAccounts([]); // Clear selected accounts
     // fetchAccounts(currentPage); // Refresh after deletion
   };
 
-
-  
   const toggleSelectAccount = (accountId: string) => {
     setSelectedAccounts((prevSelected) =>
       prevSelected.includes(accountId)
@@ -59,33 +55,28 @@ function Page() {
     );
   };
 
-  
   const toggleSelectAll = () => {
     if (selectedAccounts.length === Ips.length) {
       setChecked(!checked);
       setSelectedAccounts([]);
     } else {
       setChecked(!checked);
-      setSelectedAccounts(Ips.map((account: any) => account._id));
+      setSelectedAccounts(Ips.map((account: any) => account.id));
     }
-      
   };
-
 
   const getAllIps = async () => {
     await getIps(dispatch);
   };
 
   useEffect(() => {
-    if(Ips.length===0 || selectedAccounts.length!==Ips.length){
-      setChecked(false)
+    if (Ips.length === 0 || selectedAccounts.length !== Ips.length) {
+      setChecked(false);
     }
-    if(selectedAccounts.length===Ips.length && selectedAccounts.length>0){
-      setChecked(true)
+    if (selectedAccounts.length === Ips.length && selectedAccounts.length > 0) {
+      setChecked(true);
     }
-  }, [selectedAccounts,Ips])
-  
-  
+  }, [selectedAccounts, Ips]);
 
   useEffect(() => {
     getAllIps();
@@ -95,13 +86,13 @@ function Page() {
     const updatedSelected = selected.includes(page)
       ? selected.filter((item) => item !== page)
       : [...selected, page];
-  
+
     setSelected(updatedSelected);
 
-    if(blockedAgents.includes(page)){
+    if (blockedAgents?.includes(page)) {
       return;
     }
-  
+
     try {
       const response = await fetch("http://localhost:8080/os-blocker", {
         method: "POST",
@@ -110,7 +101,7 @@ function Page() {
         },
         body: JSON.stringify({ blockedUserAgents: updatedSelected }),
       });
-      if(response.ok){
+      if (response.ok) {
         const data = await response.json();
         setBlockedAgents(data.blockedUserAgents);
       }
@@ -121,29 +112,31 @@ function Page() {
 
   useEffect(() => {
     const getAllBlockedAgents = async () => {
-    const response = await fetch("http://localhost:8080/blocker");
-    const data = await response.json();
-    setBlockedAgents(data.blockedAgents)
-  };
-  getAllBlockedAgents();
-}, [blockedAgents.length])
+      const response = await fetch("http://localhost:8080/blocker");
+      const data = await response.json();
+      setBlockedAgents(data.blockedAgents);
+    };
+    getAllBlockedAgents();
+  }, [blockedAgents?.length]);
 
-const deleteAgent = async (id:any) => {
-  try {
-    const response = await fetch(`http://localhost:8080/os-blocker/${id}`, {
-      method: "DELETE",
-    });
+  const deleteAgent = async (id: any) => {
+    try {
+      const response = await fetch(`http://localhost:8080/os-blocker/${id}`, {
+        method: "DELETE",
+      });
 
-    const data = await response.json();
-    if (response.ok) {
-      setBlockedAgents((prev:any) => prev.filter((agent:any) => agent._id !== id));
-    } else {
-      console.error(data.error);
+      const data = await response.json();
+      if (response.ok) {
+        setBlockedAgents((prev: any) =>
+          prev.filter((agent: any) => agent.id !== id)
+        );
+      } else {
+        console.error(data.error);
+      }
+    } catch (error) {
+      console.error("Failed to delete agent", error);
     }
-  } catch (error) {
-    console.error("Failed to delete agent", error);
-  }
-};
+  };
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentIps = Ips.slice(indexOfFirstItem, indexOfLastItem);
@@ -163,13 +156,13 @@ const deleteAgent = async (id:any) => {
                     className="title:rounded-md"
                     onClick={handleOpenPopup}
                     title={"Add IP"}
-                    >
+                  >
                     <SquarePlus size={30} className="hover:text-blue-400" />
                   </button>
                   <div
                     title="Delete selected logs"
                     className="hover:text-red-500"
-                    >
+                  >
                     <Button
                       className="btn-md bg-[#546dfe]"
                       onClick={handleDeleteSelectedAccounts}
@@ -186,7 +179,7 @@ const deleteAgent = async (id:any) => {
                     setIpVal={setIpVal}
                     ips={ips}
                     setIps={setIps}
-                    />
+                  />
                   {/* <input
                     className="form-control form-control-sm"
                     type="text"
@@ -198,42 +191,44 @@ const deleteAgent = async (id:any) => {
             </Card.Header>
             <Card.Body className="p-0">
               <div className="table-responsive">
-                      {Ips.length ? (
-                <table className="table text-nowrap">
-                  <thead>
-                    <tr>
-                    <th>
-                        <input
-                          title="select all"
-                          className="mt-1"
-                          type="checkbox"
-                          checked={checked}
-                          onChange={toggleSelectAll}
+                {Ips.length ? (
+                  <table className="table text-nowrap">
+                    <thead>
+                      <tr>
+                        <th>
+                          <input
+                            title="select all"
+                            className="mt-1"
+                            type="checkbox"
+                            checked={checked}
+                            onChange={toggleSelectAll}
                           />
-                      </th>
-                      <th>IP Address</th>
-                      <th>Date</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {currentIps?.length > 0 &&
-                      currentIps?.map((item: any) => (
-                        <tr key={item?._id}>
-                          <td>
-                            <input
-                              type="checkbox"
-                              checked={selectedAccounts.includes(item._id)}
-                              onChange={() => toggleSelectAccount(item._id)}
-                            />
-                          </td>
-                          {<td>{item?.ip}</td>}
-                          <td>
-                            <div className="btn-list">
-                            {moment(item?.createdAt).format("ddd, MMM DD, YYYY, hh:mm A")}
-                            </div>
-                          </td>
-                          {/* <td> */}
+                        </th>
+                        <th>IP Address</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {currentIps?.length > 0 &&
+                        currentIps?.map((item: any) => (
+                          <tr key={item?.id}>
+                            <td>
+                              <input
+                                type="checkbox"
+                                checked={selectedAccounts.includes(item.id)}
+                                onChange={() => toggleSelectAccount(item.id)}
+                              />
+                            </td>
+                            {<td>{item?.ip}</td>}
+                            <td>
+                              <div className="btn-list">
+                                {moment(item?.createdAt).format(
+                                  "ddd, MMM DD, YYYY, hh:mm A"
+                                )}
+                              </div>
+                            </td>
+                            {/* <td> */}
                             {/* Example action buttons */}
                             <td>
                               <button
@@ -250,15 +245,16 @@ const deleteAgent = async (id:any) => {
                               >
                               <Pencil size={14} />
                               </button> */}
-                          {/* </td> */}
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
-            ):(
-                <div className="text-center h-[500px] flex items-center justify-center self-center">
-                  No IPs Found
-                </div>)}
+                            {/* </td> */}
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <div className="text-center h-[500px] flex items-center justify-center self-center">
+                    No IPs Found
+                  </div>
+                )}
               </div>
             </Card.Body>
             <Card.Footer>
@@ -279,19 +275,21 @@ const deleteAgent = async (id:any) => {
                       >
                         Prev
                       </Pagination.Item>
-                      {Array.from({ length: Math.ceil(Ips.length / itemsPerPage) }).map(
-                        (_, index) => (
-                          <Pagination.Item
-                            key={index + 1}
-                            active={currentPage === index + 1}
-                            onClick={() => paginate(index + 1)}
-                          >
-                            {index + 1}
-                          </Pagination.Item>
-                        )
-                      )}
+                      {Array.from({
+                        length: Math.ceil(Ips.length / itemsPerPage),
+                      }).map((_, index) => (
+                        <Pagination.Item
+                          key={index + 1}
+                          active={currentPage === index + 1}
+                          onClick={() => paginate(index + 1)}
+                        >
+                          {index + 1}
+                        </Pagination.Item>
+                      ))}
                       <Pagination.Item
-                        disabled={currentPage === Math.ceil(Ips.length / itemsPerPage)}
+                        disabled={
+                          currentPage === Math.ceil(Ips.length / itemsPerPage)
+                        }
                         onClick={() => paginate(currentPage + 1)}
                       >
                         Next
@@ -304,84 +302,96 @@ const deleteAgent = async (id:any) => {
           </Card>
         </Col>
       </Row>
-      {
-        user?.admin&&
+      {user?.role === "admin" && (
         <Row>
           <Col xl={12}>
-        <Card className="custom-card">
-        <Card.Header className="flex justify-content-between">
-              <Card.Title>Blocked Agents</Card.Title>
-              <Dropdown>
-          <Dropdown.Toggle className="nav-link" variant="" id="dropdown-basic">
-            Block user agents
-          </Dropdown.Toggle>
-          <Dropdown.Menu>
-            {blockedUserAgents.map((page, index) => (
-              <Dropdown.Item
-                disabled={blockedAgents.some(agent => agent.userAgent === page)}
-                key={index}
-                as="div"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <label className="d-flex align-items-center">
-                  <input
-                    className="mr-2"
-                    type="checkbox"
-                    checked={selected.includes(page) || blockedAgents.some(agent => agent.userAgent === page)}
-                    onChange={() => {
-                      toggleSelect(page);
-                    }}
-                  />
-                  {page}
-                </label>
-              </Dropdown.Item>
-            ))}
-          </Dropdown.Menu>
-        </Dropdown>
-            </Card.Header>
-              {blockedAgents.length>0?(
-          <Card.Body>
-            <table className="table text-nowrap">
-            <thead>
-                    <tr>
-                      <th>Blocked</th>
-                      <th>Date</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                <tbody>
-                {blockedAgents?.length>0 &&
-                  blockedAgents?.map((agent:any)=>(
-                    <tr>
-                      <td>{agent?.userAgent}</td>
-                      <td>
-                        <div className="btn-list">
-                        {moment(agent?.createdAt).format("ddd, MMM DD, YYYY, hh:mm A")}
-                        </div>
-                      </td>
-                      <td>
-                          <button
-                            title="Delete IP"
-                            className="text-red-500"
-                            onClick={() => deleteAgent(agent?._id)}
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-          </Card.Body>
-              ):(
+            <Card className="custom-card">
+              <Card.Header className="flex justify-content-between">
+                <Card.Title>Blocked Agents</Card.Title>
+                <Dropdown>
+                  <Dropdown.Toggle
+                    className="nav-link"
+                    variant=""
+                    id="dropdown-basic"
+                  >
+                    Block user agents
+                  </Dropdown.Toggle>
+                  <Dropdown.Menu>
+                    {blockedUserAgents.map((page, index) => (
+                      <Dropdown.Item
+                        disabled={blockedAgents?.some(
+                          (agent) => agent.userAgent === page
+                        )}
+                        key={index}
+                        as="div"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <label className="d-flex align-items-center">
+                          <input
+                            className="mr-2"
+                            type="checkbox"
+                            checked={
+                              selected.includes(page) ||
+                              blockedAgents?.some(
+                                (agent) => agent.userAgent === page
+                              )
+                            }
+                            onChange={() => {
+                              toggleSelect(page);
+                            }}
+                          />
+                          {page}
+                        </label>
+                      </Dropdown.Item>
+                    ))}
+                  </Dropdown.Menu>
+                </Dropdown>
+              </Card.Header>
+              {blockedAgents?.length > 0 ? (
+                <Card.Body>
+                  <table className="table text-nowrap">
+                    <thead>
+                      <tr>
+                        <th>Blocked</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {blockedAgents?.length > 0 &&
+                        blockedAgents?.map((agent: any) => (
+                          <tr>
+                            <td>{agent?.userAgent}</td>
+                            <td>
+                              <div className="btn-list">
+                                {moment(agent?.createdAt).format(
+                                  "ddd, MMM DD, YYYY, hh:mm A"
+                                )}
+                              </div>
+                            </td>
+                            <td>
+                              <button
+                                title="Delete IP"
+                                className="text-red-500"
+                                onClick={() => deleteAgent(agent?.id)}
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </Card.Body>
+              ) : (
                 <div className="text-center h-[500px] flex items-center justify-center self-center">
                   No Blocked Agents Found
                 </div>
               )}
-        </Card>
-        </Col>
+            </Card>
+          </Col>
         </Row>
-      }
+      )}
     </Fragment>
   );
 }
@@ -531,7 +541,7 @@ export default Page;
 //                     blockIpRange={blockIpRange}
 //                   />
 //                 </div>
-                
+
 //               </div>
 //             </Card.Header>
 //             <Card.Body className="p-0">
@@ -600,4 +610,3 @@ export default Page;
 // }
 
 // export default Page;
-

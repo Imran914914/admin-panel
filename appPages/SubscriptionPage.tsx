@@ -16,6 +16,7 @@ const SubscriptionPage = () => {
   const [popUptext, setpopUptext] = useState({ title: "", desc: "" });
   const auth = useSelector((state: any) => state.auth);
   const subscriptions = useSelector((state: any) => state.dash.subscriptions);
+  console.log("subscriptions:  ", subscriptions)
   const [loading, setLoading] = useState(false);
   const [plans, setPlans] = useState([]);
   const [redeemCode, setRedeemCode] = useState('');
@@ -46,7 +47,7 @@ const SubscriptionPage = () => {
 
       expireDate.setMonth(currentDate.getMonth() + duration);
       const payload = {
-        userId: auth?.user?._id,
+        userId: auth?.user?.id,
         subscriptionId,
         startDate: currentDate,
         expireDate,
@@ -84,28 +85,28 @@ const SubscriptionPage = () => {
   // console.log(auth?.user?._id)
 
   const handleSubmit = async () => {
-    // // Validate fields before submission
-    // if (!type || !duration || !amount || (type === "redeem" && !redeemCode)) {
-    //   alert("Please fill in all required fields.");
-    //   return;
-    // }
+    // Validate fields before submission
+    if (!type || !duration || !amount || (type === "redeem" && !redeemCode)) {
+      alert("Please fill in all required fields.");
+      return;
+    }
 
-    // const payload = {
-    //   type,
-    //   createdBy: auth?.user?._id,
-    //   duration,
-    //   amount,
-    //   redeemCode: type === "redeem" ? redeemCode : undefined,
-    // };
+    const payload = {
+      type,
+      createdBy: auth?.user?.id,
+      duration,
+      amount,
+      redeemCode: type === "redeem" ? redeemCode : undefined,
+    };
 
-    // const response = await createSubscription(payload, dispatch);
-    // console.log("Response:", response);
+    const response = await createSubscription(payload, dispatch);
+    console.log("Response:", response);
 
-    // if (response.message === "Subscription created successfully.") {
-    //   alert("Subscription created!");
-    // } else {
-    //   alert("Failed to create subscription.");
-    // }
+    if (response.message === "Subscription created successfully.") {
+      alert("Subscription created!");
+    } else {
+      alert("Failed to create subscription.");
+    }
   };
 
   return (
@@ -250,7 +251,7 @@ const SubscriptionPage = () => {
                           : "btn-outline-primary"
                       } d-grid w-100 btn-wave`}
                       onClick={() =>
-                        updateSubscription(plan.type, plan.duration, plan?._id)
+                        updateSubscription(plan.type, plan.duration, plan?.id)
                       }
                     >
                       {loading == plan.type ? (
@@ -504,7 +505,7 @@ const SubscriptionPage = () => {
       <h4 className="fw-bold text-center mb-4">Create a New Subscription</h4>
 
       {/* Subscription Type */}
-      {/* <div className="mb-3">
+      <div className="mb-3">
         <label htmlFor="type" className="form-label fw-semibold">
           Subscription Type
         </label>
@@ -519,7 +520,7 @@ const SubscriptionPage = () => {
           <option value="pro">Pro</option>
           <option value="premium">Premium</option>
         </select>
-      </div> */}
+      </div>
 
       {/* Duration (in months) */}
       <div className="mb-3">

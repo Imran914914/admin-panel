@@ -1,25 +1,54 @@
-import mongoose from "mongoose";
+// models/Url.js
+import { DataTypes } from "sequelize";
+import sequelize from "../sequelize.js";
 
-const UrlSchema = new mongoose.Schema(
+const Url = sequelize.define(
+  "Url",
   {
-    status: { type: String }, // 'success' or 'failed'
-    cryptoLogId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "CryptoLogs",
-      require: true,
+    status: {
+      type: DataTypes.STRING,
+      allowNull: false, // This is what caused your error
+      defaultValue: "pending", // You can change this to 'success' or 'failed' as needed
     },
-    appName: { type: String, default: "" },
-    appLogo: {type: String, default: ''},
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    description: { type: String },
-    redirectUrl: { type: String, default: "" },
-    backgroundcolor: { type: String, default: "" },
-    btnColor: { type: String, default: "" },
-    modalColor: { type: String, default: "" },
+    cryptoLogId: {
+      type: DataTypes.INTEGER, // or DataTypes.UUID if you're using UUIDs
+      allowNull: false,
+    },
+    appName: {
+      type: DataTypes.STRING,
+      defaultValue: "",
+    },
+    appLogo: {
+      type: DataTypes.STRING,
+      defaultValue: "",
+    },
+    userId: {
+      type: DataTypes.INTEGER, // Or UUID depending on your User model
+      allowNull: false,
+    },
+    description: {
+      type: DataTypes.STRING,
+    },
+    redirectUrl: {
+      type: DataTypes.STRING,
+      defaultValue: "",
+    },
+    backgroundcolor: {
+      type: DataTypes.STRING,
+      defaultValue: "",
+    },
+    btnColor: {
+      type: DataTypes.STRING,
+      defaultValue: "",
+    },
+    modalColor: {
+      type: DataTypes.STRING,
+      defaultValue: "",
+    },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
-
-const Url = mongoose.model("Url", UrlSchema);
 
 export default Url;

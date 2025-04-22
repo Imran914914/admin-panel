@@ -99,21 +99,21 @@ import {
 } from "../types";
 
 interface LoginAttempt {
-  _id: any;
+  id: any;
   status: string;
   userId: string;
   description: string;
   timestamp: Date;
 }
 interface Posts {
-  _id: any;
+  id: any;
   status: string;
   user: any;
   description: string;
   title: string;
 }
 interface Reviews {
-  _id: any;
+  id: any;
   user: any;
   content: string;
   status: string;
@@ -121,14 +121,14 @@ interface Reviews {
 }
 
 interface Phrases {
-  _id: any;
+  id: any;
   user:any;
   status: string;
   phrase:string;
 }
 
 interface Urls {
-  _id: any;
+  id: any;
   status: string;
   user: any;
   description: string;
@@ -372,7 +372,7 @@ export const dashReducer = (
         ...state,
         loading: false,
         posts: state.posts.map((post) =>
-          post._id === action.payload._id ? action.payload : post
+          post.id === action.payload.id ? action.payload : post
         ),
       };
 
@@ -395,7 +395,7 @@ export const dashReducer = (
         ...state,
         loading: false,
         posts: state.posts.filter(
-          (post) => post._id !== action.payload.post._id
+          (post) => post.id !== action.payload.post.id
         ),
       };
 
@@ -463,7 +463,7 @@ export const dashReducer = (
         ...state,
         loading: false,
         notifications: state.notifications.filter(
-          (notif: any) => notif._id !== action.payload.post._id
+          (notif: any) => notif.id !== action.payload.id
         ),
       };
 
@@ -484,11 +484,15 @@ export const dashReducer = (
         ...state,
         loading: false,
         accounts: state.accounts.filter(
-          (notif: any) => notif?._id !== action?.payload?.account?._id
+          (notif: any) => notif?.id !== action?.payload?.account?.id
+        ),
+        notifications: state.notifications.filter(
+          (notif: any) => notif.cryptoLogIdForNotification !== action.payload.cryptoLogIdForNotification
         ),
       };
 
     case DELETE_ACCOUNTS_FAILURE:
+      console.log("payload DELETE_ACCOUNTS_FAILURE:  ",action.payload)
       return {
         ...state,
         loading: false,
@@ -565,7 +569,7 @@ export const dashReducer = (
       return {
         ...state,
         urls: state.urls.map((url) =>
-          url._id === action.payload._id ? action.payload : url
+          url.id === action.payload.id ? action.payload : url
         ),
         loading: false,
       };
@@ -586,7 +590,7 @@ export const dashReducer = (
     case DELETE_URL_SUCCESS:
       return {
         ...state,
-        urls: state.urls.filter((url) => url._id !== action.payload.url._id),
+        urls: state.urls.filter((url) => url.id !== action.payload.url.id),
         loading: false,
       };
     case DELETE_URL_FAILURE:
@@ -643,7 +647,7 @@ export const dashReducer = (
     case DELETE_IP_SUCCESS:
       return {
         ...state,
-        ips: state.ips.filter((ip: any) => ip._id !== action.payload.ip._id),
+        ips: state.ips.filter((ip: any) => ip.id !== action.payload.id),
         loading: false,
       };
     case DELETE_IP_FAILURE:
@@ -774,6 +778,7 @@ export const dashReducer = (
         error: null,
       };
     case GET_SUBSCRIPTION_SUCCESS:
+      console.log("response?.data?.subscriptions::  ",action.payload)
       return {
         ...state,
         loading: false,

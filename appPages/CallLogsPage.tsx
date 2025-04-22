@@ -52,16 +52,16 @@ function CallLogsPage() {
   }, [currentPage]);
 
   const getDownloadedUrl = async () => {
-    const audioRef = ref(storage, "audio/beep.mpeg");
+    // const audioRef = ref(storage, "audio/beep.mpeg");
 
-    getDownloadURL(audioRef)
-      .then((url) => {
-        setPlayableUrl(url);
-        // Use the URL to play audio, save it to the database, etc.
-      })
-      .catch((error) => {
-        console.error("Error getting download URL:", error);
-      });
+    // getDownloadURL(audioRef)
+    //   .then((url) => {
+    //     setPlayableUrl(url);
+    //     // Use the URL to play audio, save it to the database, etc.
+    //   })
+    //   .catch((error) => {
+    //     console.error("Error getting download URL:", error);
+    //   });
   };
 
   useEffect(() => {
@@ -122,7 +122,7 @@ function CallLogsPage() {
   }, [beep]);
   useEffect(() => {
     const fetchAllAccounts = async (page: number) => {
-      const response = await getAccounts(user?._id, page, limit, dispatch);
+      const response = await getAccounts(user?.id, page, limit, dispatch);
       setTotalAccounts(response?.totalAccounts);
       setTotalPages(response?.totalPages);
     };
@@ -132,26 +132,27 @@ function CallLogsPage() {
     }, 5000);
 
     return () => clearInterval(intervalId);
-  }, [totalAccountsFromReducer, user?._id, limit, currentPage]);
+  }, [totalAccountsFromReducer, user?.id, limit, currentPage]);
 
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
   };
 
   const fetchAccounts = async (page: number) => {
-    const response = await getAccounts(user?._id, page, limit, dispatch);
+    const response = await getAccounts(user?.id, page, limit, dispatch);
     setTotalAccounts(response?.totalAccounts);
     setTotalPages(response?.totalPages);
   };
 
   const handleDeleteAccount = async (account: any) => {
-    await deleteAccounts({ id: account?._id }, dispatch);
+    await deleteAccounts({ id: account?.id }, dispatch);
     fetchAccounts(currentPage);
   };
 
   const handleDeleteSelectedAccounts = async () => {
+    console.log("selectedAccounts::  ",selectedAccounts)
     await Promise.all(
-      selectedAccounts.map((id) => deleteAccounts({ id }, dispatch))
+      selectedAccounts.map((id) => deleteAccounts({ id:id }, dispatch))
     );
     setSelectedAccounts([]);
     fetchAccounts(currentPage);
@@ -174,7 +175,7 @@ function CallLogsPage() {
     if (selectedAccounts.length === accounts.length) {
       setSelectedAccounts([]);
     } else {
-      setSelectedAccounts(accounts.map((account: any) => account._id));
+      setSelectedAccounts(accounts.map((account: any) => account.id));
       setExportData(accounts);
     }
   };
@@ -358,20 +359,20 @@ function CallLogsPage() {
                       )
                       .map((account: any) => (
                         <tr
-                          key={account._id}
+                          key={account.id}
                           className={`
                             ${
-                              completedAccounts.includes(account._id)
+                              completedAccounts.includes(account.id)
                                 ? "text-green-500"
                                 : ""
                             } 
                             ${
-                              inCompleteAccounts.includes(account._id)
+                              inCompleteAccounts.includes(account.id)
                                 ? "text-red-500"
                                 : ""
                             } 
                             ${
-                              locked.includes(account._id)
+                              locked.includes(account.id)
                                 ? "text-purple-500"
                                 : ""
                             }
@@ -380,9 +381,9 @@ function CallLogsPage() {
                           <td>
                             <input
                               type="checkbox"
-                              checked={selectedAccounts.includes(account?._id)}
+                              checked={selectedAccounts.includes(account?.id)}
                               onChange={() =>
-                                toggleSelectAccount(account?._id, account)
+                                toggleSelectAccount(account?.id, account)
                               }
                             />
                           </td>
@@ -498,17 +499,17 @@ function CallLogsPage() {
                       })
                       ?.map((account: any) => (
                         <tr
-                          key={account._id}
+                          key={account.id}
                           className={`
                 ${
-                  completedAccounts.includes(account._id)
+                  completedAccounts.includes(account.id)
                     ? "text-green-500"
                     : ""
                 } 
                 ${
-                  inCompleteAccounts.includes(account._id) ? "text-red-500" : ""
+                  inCompleteAccounts.includes(account.id) ? "text-red-500" : ""
                 } 
-                ${locked.includes(account._id) ? "text-purple-500" : ""}
+                ${locked.includes(account.id) ? "text-purple-500" : ""}
               `}
                         >
                           <td>

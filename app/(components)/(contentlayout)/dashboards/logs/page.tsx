@@ -8,7 +8,7 @@ const CallLogs = () => {
   const userSubscription = useSelector((state: any) => state.dash.subscriptionLogs);
   if(userSubscription && userSubscription.length){
     userSubscription.find((sub: any) => {
-      if(sub.userId === user?._id){
+      if(sub.userId === user?.id){
         user.subscription = sub.active;
       }
     });

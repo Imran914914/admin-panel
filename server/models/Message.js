@@ -1,10 +1,26 @@
 // models/Message.js
-import mongoose from "mongoose";
+import { DataTypes } from "sequelize";
+import sequelize from "../sequelize.js"; // adjust this path to your sequelize instance
 
-const messageSchema = new mongoose.Schema({
-  username: { type: String, required: true },
-  content: { type: String, required: true },
-  timestamp: { type: Date, default: Date.now },
-});
+const Message = sequelize.define(
+  "Message",
+  {
+    username: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    content: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false, // Make true if system-wide notifications are allowed
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
-export default mongoose.model("Message", messageSchema);
+export default Message;

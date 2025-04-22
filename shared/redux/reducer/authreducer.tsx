@@ -130,7 +130,7 @@ export const authReducer = (
         loading: false,
         deleteduser: action.payload.deletedUser,
         allUsers: state.allUsers.filter(
-          (user: any) => user._id !== action.payload.deletedUser._id
+          (user: any) => user.id !== action.payload.deletedUser.id
         ),
         error: null,
       };

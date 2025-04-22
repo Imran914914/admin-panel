@@ -1,27 +1,39 @@
-import { Schema } from "mongoose";
-import mongoose from "mongoose";
-const SubscriptionHistorySchema = new Schema(
+// models/SubscriptionHistory.js
+import { DataTypes } from "sequelize";
+import sequelize from "../sequelize.js";
+
+const SubscriptionHistory = sequelize.define(
+  "SubscriptionHistory",
   {
+    startDate: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
+    },
+    expireDate: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
+    },
+    active: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    redeem: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+    },
     userId: {
-      //which user created the Subscription
-      type: mongoose.Schema.Types.ObjectId,
-      required: true,
-      ref: "User",
+      // Add userId field
+      type: DataTypes.INTEGER,
+      allowNull: false, // Ensure that userId is required
     },
-    subscriptionId: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: true,
-      ref: "Subscription",
+    createdBy: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
     },
-    startDate: {type: Date, default: Date.now()},
-    expireDate: {type: Date, default: Date.now()},
-    active: {type: Boolean, default: false},
-    redeem: { type: Boolean, default: true },
   },
-
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
-
-const SubscriptionHistory = mongoose.model("SubscriptionHistory", SubscriptionHistorySchema);
 
 export default SubscriptionHistory;

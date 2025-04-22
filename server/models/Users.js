@@ -1,40 +1,99 @@
-import mongoose from "mongoose";
+import { Sequelize, DataTypes } from "sequelize";
+import sequelize from "../sequelize.js";
 import bcrypt from "bcryptjs";
 
-
-
-const userSchema = new mongoose.Schema(
+const User = sequelize.define(
+  "User",
   {
-    email: { type: String, required: false, unique: false, sparse: true },
-    profileImage: { type: String },
-    coverImage: { type: String },
-    userName: { type: String, required: false },
-    password: { type: String, required: false, default: null },
-    role: {type: String, default: ""},//we can have multiple roles here basic, premium ,admin
-    bio: { type: String, required: false, default: "" },
-    isVerified: { type: Boolean, default: false },
-    otp: { type: Number, default: 0 },
-    otpExpiration: { type: Date, default: Date.now },
-    isOtpVerified: { type: Boolean, default: false },
-    isDeleted: { type: Boolean, default: false },
-    admin: { type: Boolean, default: false },
-    deletedAt: { type: Date },
-    location: { type: Object },
-    lastLogin: {type : Date, default: Date.now()},
-    skipPages: { type: Array, default: []},
-    is2FAEnabled:{type: Boolean, default:false},
-    twoFactorSecret:{ type:String, default:null},
-    is2FAverified:{type: Boolean, default:false},
-    isBanned:{type:Boolean, default:false},
-    banReason:{type:String, default:""},
+    email: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      unique: true,
+    },
+    profileImage: DataTypes.STRING,
+    coverImage: DataTypes.STRING,
+    userName: DataTypes.STRING,
+    password: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      defaultValue: null,
+    },
+    role: {
+      type: DataTypes.STRING,
+      defaultValue: "",
+    },
+    bio: {
+      type: DataTypes.STRING,
+      defaultValue: "",
+    },
+    isVerified: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    otp: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
+    otpExpiration: {
+      type: DataTypes.DATE,
+      defaultValue: Sequelize.NOW,
+    },
+    isOtpVerified: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    isDeleted: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    admin: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    deletedAt: DataTypes.DATE,
+    location: DataTypes.JSON,
+    lastLogin: {
+      type: DataTypes.DATE,
+      defaultValue: Sequelize.NOW,
+    },
+    skipPages: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
+    is2FAEnabled: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    twoFactorSecret: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    is2FAverified: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    isBanned: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    banReason: {
+      type: DataTypes.STRING,
+      defaultValue: "",
+    },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
-userSchema.methods.comparePassword = async function (password) {
+User.beforeCreate(async (user) => {
+  if (user.password) {
+    user.password = await bcrypt.hash(user.password, 10);
+  }
+});
+
+User.prototype.comparePassword = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
-
-const User = mongoose.model("User", userSchema);
 
 export default User;

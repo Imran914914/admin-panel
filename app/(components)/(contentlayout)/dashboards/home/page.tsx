@@ -29,7 +29,6 @@ import Popup from "../../../../../components/Popup";
 const Home = () => {
   const dispatch = useDispatch();
   const auth = useSelector((state: any) => state.auth.user);
-  // console.log("auth id::   ", auth._id);
   const {
     reviews = [],
     posts,
@@ -83,7 +82,7 @@ const Home = () => {
 
   // Fetch accounts with pagination
   const fetchAccounts = async (page: number) => {
-    const response = await getAccounts(auth?._id, page, 10, dispatch);
+    const response = await getAccounts(auth?.id, page, 10, dispatch);
     setPercentage({
       ...percentage,
       accountPercentage: response?.percentageChange,
@@ -110,12 +109,12 @@ const Home = () => {
   const getAllLoginAttempts = async () => {
     if (auth?.role == "admin") {
       await getGlobalLoginAttempts(
-        { id: auth?._id, page: currentPage, limit: recordsPerPage },
+        { id: auth?.id, page: currentPage, limit: recordsPerPage },
         dispatch
       );
     } else if(auth?.role == 'basic'){
       await getLoginAttempts(
-        { id: auth?._id, page: currentPage, limit: recordsPerPage },
+        { id: auth?.id, page: currentPage, limit: recordsPerPage },
         dispatch
       );
     }
@@ -147,7 +146,7 @@ const Home = () => {
 
   const getUserSubscriptionHistory = async () => {
     try {
-      const histories = await getSubscriptionHistory([auth?._id], dispatch);
+      const histories = await getSubscriptionHistory([auth?.id], dispatch);
       if (histories) {
         console.log("Fetched subscription histories:", histories);
       } else {

@@ -59,9 +59,9 @@ const RedeemCodePage = () => {
   const getUserLogs = async () => {
     // need to check this
     if (user?.role == "admin") {
-      await getSubscriptionHistoryAdmin(user?._id, dispatch);
+      await getSubscriptionHistoryAdmin(user?.id, dispatch);
     } else {
-      await getSubscriptionHistory(user?._id, dispatch);
+      await getSubscriptionHistory(user?.id, dispatch);
     }
   };
   return (
@@ -90,7 +90,7 @@ const RedeemCodePage = () => {
                     <tbody>
                       {subLogs?.length > 0 &&
                         subLogs?.map((code: any) => (
-                          <tr key={code._id}>
+                          <tr key={code.id}>
                             <td>{code?.userDetails?.userName}</td>
                             <td>{code?.subscriptionDetails?.redeemCode}</td>
                             <td>{code?.subscriptionDetails?.amount}</td>
@@ -122,7 +122,7 @@ const RedeemCodePage = () => {
                     <tbody>
                       {subLogs?.length > 0 &&
                         subLogs?.map((code: any) => (
-                          <tr key={code._id}>
+                          <tr key={code.id}>
                             <td>
                               {code?.subscriptionId?.redeemCode ??
                                 code?.subscriptionId?.type}
@@ -177,7 +177,7 @@ const RedeemCodePage = () => {
                       {filteredRedeemCode &&
                         filteredRedeemCode?.length &&
                         filteredRedeemCode?.map((code: any) => (
-                          <tr key={code._id}>
+                          <tr key={code.id}>
                             <td>{code?.createdBy?.userName}</td>
                             <td>{code?.redeemCode}</td>
                             <td>

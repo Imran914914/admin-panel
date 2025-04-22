@@ -17,10 +17,7 @@ const page = () => {
 
   // Single notification close
   const handleNotificationClose = async (index: number, event: any) => {
-    console.log("notification id", event?._id);
-    await deleteNotifications({ id: event?._id }, dispatch);
-
-    // Close the entire tab
+    await deleteNotifications({ id: event?.id }, dispatch);
     window.close();
   };
 
@@ -41,8 +38,7 @@ const page = () => {
 
   useEffect(() => {
     getNotificationslocal();
-    setNotification(notifications);
-  }, [notifications]);
+  }, []);
 
   return (
     <Fragment>
@@ -54,16 +50,16 @@ const page = () => {
               <Card.Title>All Notifications</Card.Title>
               {/* Clear All Button */}
               <Button 
-              disabled={notification.length === 0}
+              disabled={notifications.length === 0}
               onClick={handleClearAll}
               >Clear All</Button>
             </Card.Header>
             <Card.Body>
                 <table className="table">
                   <tbody>
-                    {notification && notification.length > 0 ? (
-                      notification.map((idx: any, index: any) => (
-                        <tr key={idx._id}>
+                    {notifications && notifications.length > 0 ? (
+                      notifications.map((idx: any, index: any) => (
+                        <tr key={idx.id}>
                           <td className="w-100">{idx?.message}</td>
                           <td className="text-end">
                             <i

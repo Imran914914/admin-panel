@@ -1,13 +1,18 @@
-import mongoose from "mongoose";
+// models/Phrase.js
+import { DataTypes } from "sequelize";
+import sequelize from "../sequelize.js";
 
-const phraseSchema = new mongoose.Schema(
-  {
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    phrase: {type:String, required:true}
+const Phrase = sequelize.define("Phrase", {
+  phrase: {
+    type: DataTypes.STRING,
+    allowNull: false,
   },
-  { timestamps: true }
-);
-
-const Phrase = mongoose.model("Phrase", phraseSchema);
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+}, {
+  timestamps: true,
+});
 
 export default Phrase;

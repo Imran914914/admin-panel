@@ -153,7 +153,7 @@ export const createReview = async (data: any, dispatch: any) => {
   try {
     dispatch({ type: "CREATE_REVIEW_INIT" }); // Start creating a review
     const response = await apiClient.post("/dashboard/createReview", data);
-
+    // console.log("response:  : ", response)
     if (response.status === 200) {
       dispatch({
         type: "CREATE_REVIEW_SUCCESS",
@@ -388,7 +388,20 @@ export const getNotifications = async (dispatch: any) => {
     }
   }
 };
+
 export const deleteNotifications = async (data: any, dispatch: any) => {
+  // console.log("Data in delete notification: ", data);
+
+  if (!data || !data.id) {
+    const errorMsg = "deleteNotifications error: 'id' is missing in data";
+    console.error(errorMsg);
+    dispatch({
+      type: DELETE_NOTIFICATIONS_FAILURE,
+      payload: errorMsg,
+    });
+    return;
+  }
+
   try {
     dispatch({ type: DELETE_NOTIFICATIONS_INIT });
 
@@ -396,35 +409,27 @@ export const deleteNotifications = async (data: any, dispatch: any) => {
       `/dashboard/deleteNotification`,
       {},
       {
-        params: { id: data?.id },
+        params: { id: data.id },
       }
     );
-
-    // If the request was successful
 
     if (response.status === 200) {
       dispatch({ type: DELETE_NOTIFICATIONS_SUCCESS, payload: response.data });
     }
+
     return response.data.loginAttempts;
   } catch (error: any) {
-    // Handle server or network errors
-    if (error.response) {
-      dispatch({
-        type: DELETE_NOTIFICATIONS_FAILURE,
-        payload: error.response.data.message,
-      });
-      console.error("Login failed:", error.response.data.message);
-      return error.response.data.message;
-    } else {
-      console.error("Error:", error.message);
-      dispatch({
-        type: DELETE_NOTIFICATIONS_FAILURE,
-        payload: error.message,
-      });
-      return error.message;
-    }
+    // Handle error
+    const errorMsg = error?.response?.data?.message || error.message || "Unknown error";
+    console.error("Delete notification failed:", errorMsg);
+    dispatch({
+      type: DELETE_NOTIFICATIONS_FAILURE,
+      payload: errorMsg,
+    });
+    return errorMsg;
   }
 };
+
 
 export const clearAllNotifications = async (dispatch: any) => {
   try {
@@ -793,7 +798,7 @@ export const createIp = async (data: any, dispatch: any) => {
     if (response.status === 200) {
       dispatch({ type: CREATE_IP_SUCCESS, payload: response.data });
     }
-    return response.data.loginAttempts;
+    return response
   } catch (error: any) {
     // Handle server or network errors
     if (error.response) {
@@ -849,7 +854,7 @@ export const deleteIp = async (data: any, dispatch: any) => {
     const response = await apiClient.delete("/dashboard/deleteIp", {
       params: { id: data?.id },
     });
-
+    
     // If the request was successful
     if (response.status === 200) {
       dispatch({ type: DELETE_IP_SUCCESS, payload: response.data });
@@ -1060,7 +1065,6 @@ export const getSubscription = async (dispatch: any) => {
   try {
     dispatch({ type: GET_SUBSCRIPTION_INIT });
     const response = await apiClient.get(`/dashboard/getSubscriptions`);
-
     // If the request was successful
     if (response.status === 200) {
       dispatch({
@@ -1126,16 +1130,24 @@ export const getSubscription = async (dispatch: any) => {
 
 export const getSubscriptionHistory = async (userIds: any[], dispatch: any) => {
   try {
+    // Log userIds for debugging
+    // console.log("userIds::   ", userIds);
+
+    // Dispatch an action to indicate the start of the request
     dispatch({ type: GET_SUBSCRIPTIONHISTORY_INIT });
 
+    // Ensure userIds are numbers (in case they were strings or mixed types)
+    const numericUserIds = userIds.map((id: any) => Number(id));
+
+    // Make the GET request with numeric userIds as query params
     const response = await apiClient.get(
       `/dashboard/getMySubscriptionsHistory`,
       {
-        params: { userIds }, // Pass array of userIds as a query parameter
+        params: { userIds: numericUserIds }, // Send the numeric array as query params
       }
     );
 
-    // If the request was successful
+    // If the request was successful, dispatch the success action with the data
     if (response.status === 200) {
       dispatch({
         type: GET_SUBSCRIPTIONHISTORY_SUCCESS,
@@ -1145,7 +1157,7 @@ export const getSubscriptionHistory = async (userIds: any[], dispatch: any) => {
 
     return response.data;
   } catch (error: any) {
-    // Handle server or network errors
+    // Handle errors
     if (error.response) {
       dispatch({
         type: GET_SUBSCRIPTIONHISTORY_FAILURE,
@@ -1162,6 +1174,7 @@ export const getSubscriptionHistory = async (userIds: any[], dispatch: any) => {
     }
   }
 };
+
 
 export const getSubscriptionHistoryAdmin = async (
   adminId: any,
@@ -1180,7 +1193,7 @@ export const getSubscriptionHistoryAdmin = async (
 
     // If the request was successful
     if (response.status === 200) {
-      console.log("response at the api", response?.data?.subscriptionHistories);
+      // console.log("response at the api", response?.data?.subscriptionHistories);
       dispatch({
         type: GET_ADMINSUBSCRIPTIONHISTORY_SUCCESS,
         payload: response?.data?.subscriptionHistories,

@@ -14,6 +14,7 @@ import {
   updatePost,
   updateUrl,
   createIp,
+  getIps,
 } from "@/shared/Api/dashboard";
 import { useDispatch, useSelector } from "react-redux";
 import { Card, Col, Form, Nav, Row, Tab, Button } from "react-bootstrap";
@@ -72,14 +73,14 @@ const Popup = ({
         {
           title: val,
           description: descVal,
-          userId: user?._id,
+          userId: user?.id,
           id: updateId,
         },
         dispatch
       );
     } else {
       createPost(
-        { title: val, description: descVal, userId: user?._id },
+        { title: val, description: descVal, userId: user?.id },
         dispatch
       );
     }
@@ -155,7 +156,7 @@ const Popup = ({
   
       const urlData = {
         description: updatedUrl,
-        userId: user?._id,
+        userId: user?.id,
         id: updateId,
         appName: appName,
         redirectUrl: redirectLink,
@@ -244,21 +245,29 @@ const Popup = ({
       const currentIp = intToIp(currentInt);
 
       // Call the createIp function for each IP in the range
-      await createIp({ blockerId: userId?._id, ip: currentIp }, dispatch);
+      await createIp({ blockerId: userId?.id, ip: currentIp }, dispatch);
     }
 
     console.log(`Blocked all IPs from ${startIp} to ${endIp}`);
   };
 
-  const handleSubmitIp = () => {
+  const handleSubmitIp = async() => {
     if (!isValidIp(ipVal)) {
       setError("Please enter a valid IP address.");
       return;
     }
     setError("");
-    createIp({ blockerId: user?._id, ip: ipVal }, dispatch);
-    console.log("Blocked IP:", ipVal);
-    setIpVal("");
+    const res = await createIp({ blockerId: user?.id, ip: ipVal }, dispatch);
+    if(res?.status===201){
+      await getIps(dispatch)
+      console.log("Blocked IP:", ipVal);
+      setIpVal("");
+      onClose();
+      setIpVal("");
+      setStartRange("");
+      setEndRange("");
+      setError("");
+    }
   };
 
   const handleImageChange = async (
@@ -385,7 +394,7 @@ const Popup = ({
                       blockIpRange(
                         startRange,
                         endRange,
-                        user?._id,
+                        user?.id,
                         dispatch,
                         createIp
                       );

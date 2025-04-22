@@ -727,9 +727,10 @@ const Sidebar = ({ local_varaiable, ThemeChanger }: any) => {
     };
 
     const { password, ...userWithoutPassword } = updatedUser;
-
     const response = await editProfile(userWithoutPassword, dispatch);
-    window.location.reload();
+    if(response.status===200){
+      window.location.reload();
+    }
   };
   const handleClick = (event: any) => {
     // Your logic here
@@ -902,21 +903,17 @@ const Sidebar = ({ local_varaiable, ThemeChanger }: any) => {
                 </Fragment>
               ))}
             </ul>
-
-            {user?.admin && (
               <ul className="main-menu" onClick={() => handleReload()}>
                 <Fragment>
                   <li className="side-menu__item flex gap-2 cursor-pointer">
                     {/* <span className="side-menu__button cursor-pointer bg-white"> */}
-                      {/* <Icon/> */}
-                      <i className="bx bx-box text-lg"></i>
-                      {user?.role == "basic" ? "Admin" : "User"} CP
+                    {/* <Icon/> */}
+                    <i className="bx bx-box text-lg"></i>
+                    {user?.role == "basic" ? "Admin" : "User"} CP
                     {/* </span> */}
                   </li>
                 </Fragment>
               </ul>
-            )}
-
             <div
               className="slide-right"
               id="slide-right"

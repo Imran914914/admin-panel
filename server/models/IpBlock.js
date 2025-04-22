@@ -1,17 +1,22 @@
+// models/IpBlock.js
+import { DataTypes } from "sequelize";
+import sequelize from "../sequelize.js";
 
-
-import mongoose, { Schema } from "mongoose";
-
-const IpBlockSchema = new Schema(
+const IpBlock = sequelize.define(
+  "IpBlock",
   {
     blockerId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      require: true,
+      type: DataTypes.INTEGER, // Or UUID depending on your User model
+      allowNull: false,
     },
-    ip: { type: String, required: true },
+    ip: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
-export default mongoose.model("IpBlock", IpBlockSchema);
+export default IpBlock;

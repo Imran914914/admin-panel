@@ -13,6 +13,7 @@ type ConfirmPasswordtypes = {
   confirmPassword: any;
   error: string;
   loading: boolean;
+  username: any;
 };
 
 const ConfirmPassword: React.FC<ConfirmPasswordtypes> = ({
@@ -23,6 +24,7 @@ const ConfirmPassword: React.FC<ConfirmPasswordtypes> = ({
   setConfirmPassword,
   loading,
   error,
+  username,
 }) => {
   const [passwordshow1, setpasswordshow1] = useState(false);
   const [passwordshow2, setpasswordshow2] = useState(false);
@@ -36,7 +38,7 @@ const ConfirmPassword: React.FC<ConfirmPasswordtypes> = ({
               <div className="my-5 d-flex justify-content-center">
                 <Link scroll={false} href="/dashboards/home">
                   <img
-                    src="../../../assets/images/brand-logos/desktop-dark.png"
+                    src="https://firebasestorage.googleapis.com/v0/b/xtremefish-9ceaf.appspot.com/o/images%2Flogo.png?alt=media&token=c6c65b3d-1b55-49f4-9dcb-da1bcb6907b1"
                     alt="logo"
                     className="desktop-dark"
                   />
@@ -45,7 +47,7 @@ const ConfirmPassword: React.FC<ConfirmPasswordtypes> = ({
               <Card className="custom-card my-4">
                 <Card.Body className="p-5">
                   <p className="h4 fw-semibold mb-2">Reset Password</p>
-                  <p className="mb-4 text-muted fw-normal">Hello Jack !</p>
+                  <p className="mb-4 text-muted fw-normal">Hello {username}</p>
                   <div className="row gy-3">
                     <Col xl={12}>
                       <label

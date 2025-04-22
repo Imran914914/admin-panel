@@ -51,7 +51,7 @@ const Profile = () => {
   const pages = [ "OTP", "Bank Pin", "Auth Code" ]
   const handleSubmitReview = async () => {
     const reviewData = {
-      userId: user?._id,
+      userId: user?.id,
       content: val,
     };
 
@@ -59,7 +59,8 @@ const Profile = () => {
       alert("Review content is required!");
       return;
     } else {
-      await createReview(reviewData, dispatch);
+      const response = await createReview(reviewData, dispatch);
+      console.log("status:   ",response)
       setOpen(true);
       setTimeout(() => {
         setOpen(false);

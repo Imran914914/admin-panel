@@ -1,11 +1,21 @@
-import mongoose from "mongoose";
+import {Sequelize, DataTypes } from 'sequelize';
+import sequelize from '../sequelize.js';
 
-const reviewSchema = new mongoose.Schema({
-  user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  content: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now },
+const Review = sequelize.define('Review', {
+  content: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  createdAt: {
+    type: DataTypes.DATE,
+    defaultValue: Sequelize.NOW,
+  }
+}, {
+  timestamps: true,
 });
-
-const Review = mongoose.model("Review", reviewSchema);
 
 export default Review;

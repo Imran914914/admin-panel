@@ -22,11 +22,11 @@ const Chat: React.FC = () => {
   const userMessanger = useSelector((state: any) => state?.auth?.user);
   
   const socket: Socket = io("http://localhost:8080", {
-    query: { userId:userMessanger?._id },
+    query: { userId:userMessanger?.id },
   });
   useEffect(() => {
     socket.on("connect", () => {
-      socket.emit("register", userMessanger?._id);
+      socket.emit("register", userMessanger?.id);
     });
 
     socket.on("chat:initial", (initialMessages: any[]) => {
@@ -39,7 +39,7 @@ const Chat: React.FC = () => {
   
     socket.on("messageRemoved", (messageId: string) => {
       setMessages((prevMessages) =>
-        prevMessages.filter((message) => message._id !== messageId) // Filter using MongoDB _id
+        prevMessages.filter((message) => message.id !== messageId) // Filter using MongoDB _id
       );
     });
   
@@ -119,7 +119,7 @@ const Chat: React.FC = () => {
 
   const removeMessage = (messageId: string) => {
     setMessages((prevMessages) =>
-      prevMessages.filter((message) => message._id !== messageId) // Use MongoDB _id
+      prevMessages.filter((message) => message.id !== messageId) // Use MongoDB _id
     );
     socket.emit("removeMessage", messageId);
   };
@@ -127,6 +127,7 @@ const Chat: React.FC = () => {
   const sendMessage = () => {
     if (newMessage.trim() && userMessanger?.userName.trim()) {
       const messageData = {
+        userId:userMessanger?.id,
         username: userMessanger?.userName,
         content: newMessage,
         timestamp: new Date().toISOString(),
@@ -173,12 +174,12 @@ const Chat: React.FC = () => {
                   </span>
                 </p>
                 <span className="text-xs text-gray-500">
-                  {new Date(message.timestamp).toLocaleTimeString()}
+                  {new Date(message.createdAt).toLocaleTimeString()}
                 </span>
               </div>
               {userMessanger?.admin && (
                 <button
-                  onClick={() => removeMessage(message._id)}
+                  onClick={() => removeMessage(message.id)}
                   className="text-red-500 hover:text-red-700 text-sm ml-2"
                 >
                   <Trash2 size={20}/>

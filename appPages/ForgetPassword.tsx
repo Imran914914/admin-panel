@@ -6,7 +6,11 @@ import React, { Fragment, useState } from "react";
 import { Card, Col, Form, Row } from "react-bootstrap";
 import CodeScreen from "@/components/CodeScreen";
 import ConfirmPassword from "@/components/ConfirmPassword";
-import { ForgotPassword, ResetPassword, VerifyOtp } from "@/shared/Api/auth";
+import {
+  ForgotPassword,
+  ResetPassword,
+  VerifyOtp,
+} from "@/shared/Api/auth";
 import { useDispatch } from "react-redux";
 import { FaSpinner } from "react-icons/fa";
 
@@ -21,6 +25,7 @@ const ForgetPassword = () => {
   const [step, setStep] = useState<Step>(Step.EmailSent);
   const [btnText, setBtnText] = useState<string>("Send Email");
   const [email, setEmail] = useState<string>("");
+  const [username, setUsername] = useState<string>("");
   const [error, setError] = useState<any>("");
   const [otp, setOtp] = useState<any>("");
   const [emailloading, setEmailLoading] = useState<boolean>(false);
@@ -42,7 +47,7 @@ const ForgetPassword = () => {
             setBtnText("Verify");
             setStep(Step.CodeSent);
           } else {
-            setEmailLoading(false)
+            setEmailLoading(false);
             console.error("Failed to send email. Status:", response.status);
           }
           break;
@@ -51,9 +56,13 @@ const ForgetPassword = () => {
           setVerifyLoading(true);
           const verifyotpResponse = await VerifyOtp({ email, otp }, dispatch);
           if (verifyotpResponse.status == 200) {
+            // console.log("data::  ", verifyotpResponse.data.data.userName);
+            setUsername(verifyotpResponse.data.data.userName);
             setVerifyLoading(false);
             setBtnText("Save Password");
             setStep(Step.Success);
+          } else {
+            setVerifyLoading(false);
           }
           break;
 
@@ -65,7 +74,7 @@ const ForgetPassword = () => {
               dispatch
             );
             if (resetResponse.status == 200) {
-              setSuccessLoading(false)
+              setSuccessLoading(false);
 
               router.push("/"); // Navigate to the sign-in screen
             }
@@ -126,7 +135,11 @@ const ForgetPassword = () => {
                               onChange={(e) => setEmail(e.target.value)}
                             />
                           </div>
-                          {error && <p className="text-red-400 font-semibold text-center">{error}</p>}
+                          {error && (
+                            <p className="text-red-400 font-semibold text-center">
+                              {error}
+                            </p>
+                          )}
                         </Col>
                         <Col xl={12} className="d-grid mt-2">
                           {emailloading ? (
@@ -185,6 +198,7 @@ const ForgetPassword = () => {
           onBtnClick={onBtnClick}
           error={error}
           loading={successLoading}
+          username={username}
         />
       )}
     </Fragment>

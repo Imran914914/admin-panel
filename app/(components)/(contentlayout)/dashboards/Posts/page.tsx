@@ -5,15 +5,20 @@ import { Button, Card, Col, Row, Pagination } from "react-bootstrap";
 import { SquarePlus, Trash2, Pencil, RotateCcw } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import moment from "moment";
-import { getUrls, deleteUrl, getPosts, deletePost } from "@/shared/Api/dashboard";
+import {
+  getUrls,
+  deleteUrl,
+  getPosts,
+  deletePost,
+} from "@/shared/Api/dashboard";
 import { getIps } from "@/shared/Api/dashboard";
 import Popup from "@/components/Popup";
-
+import { useRouter } from "next/navigation";
 function page() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
-
+  const router = useRouter();
   const [descVal, setDescVal] = useState("");
   const [updateId, setUpdate] = useState("");
   const [postPopup, setPostPopup] = useState(true);
@@ -22,6 +27,7 @@ function page() {
 
   const dispatch = useDispatch();
   const { posts } = useSelector((state: any) => state.dash);
+  const user = useSelector((state: any) => state.auth.user);
 
   const getAllPosts = async () => {
     await getPosts(dispatch);
@@ -29,7 +35,10 @@ function page() {
 
   useEffect(() => {
     getAllPosts();
-  }, []);
+    if(user?.role==="basic"){
+      router.replace("/dashboards/home")
+    }
+  }, [user?.role]);
 
   const handleOpenPopup = () => {
     setPostPopup(true);
@@ -40,13 +49,13 @@ function page() {
   };
 
   const filterPosts = (postToDelete: any) => {
-    deletePost({ id: postToDelete?._id }, dispatch);
+    deletePost({ id: postToDelete?.id }, dispatch);
   };
 
   const handleUpdate = (post: any) => {
     setVal(post?.title);
     setDescVal(post?.description);
-    setUpdate(post?._id);
+    setUpdate(post?.id);
     handleOpenPopup();
   };
 
@@ -162,19 +171,21 @@ function page() {
                       >
                         Prev
                       </Pagination.Item>
-                      {Array.from({ length: Math.ceil(posts.length / itemsPerPage) }).map(
-                        (_, index) => (
-                          <Pagination.Item
-                            key={index + 1}
-                            active={currentPage === index + 1}
-                            onClick={() => paginate(index + 1)}
-                          >
-                            {index + 1}
-                          </Pagination.Item>
-                        )
-                      )}
+                      {Array.from({
+                        length: Math.ceil(posts.length / itemsPerPage),
+                      }).map((_, index) => (
+                        <Pagination.Item
+                          key={index + 1}
+                          active={currentPage === index + 1}
+                          onClick={() => paginate(index + 1)}
+                        >
+                          {index + 1}
+                        </Pagination.Item>
+                      ))}
                       <Pagination.Item
-                        disabled={currentPage === Math.ceil(posts.length / itemsPerPage)}
+                        disabled={
+                          currentPage === Math.ceil(posts.length / itemsPerPage)
+                        }
                         onClick={() => paginate(currentPage + 1)}
                       >
                         Next
