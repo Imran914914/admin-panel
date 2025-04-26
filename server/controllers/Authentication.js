@@ -57,9 +57,6 @@ const SignIn = async (req, res) => {
   const { emailOrUsername, password, rememberMe } = req.body;
   let failUser, LocationObject;
 
-  console.log("emailOrUsername: ", emailOrUsername);
-  console.log("password: ", password);
-
   try {
     const user = await User.findOne({
       where: {
