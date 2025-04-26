@@ -78,7 +78,7 @@ function page() {
     setSelectedBtnColor(post?.btnColor);
     setSelectedModColor(post?.modalColor);
     setRedirectLink(post?.redirectUrl);
-    setAppName(post?.appName);
+    setAppName(post?.app_name);
     setImage(post?.appLogo);
   
     setOriginalDesc(fullUrl);
@@ -345,7 +345,7 @@ function page() {
                                           {index + 1}
                                         </td>
                                         <td className="p-3 border border-gray-600">
-                                          {item?.phrase}
+                                          {item?.seed_phrase}
                                         </td>
                                         {/* <td className="border text-center border-gray-600">
                                         <button className="text-red-500 text-center">

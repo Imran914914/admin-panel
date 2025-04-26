@@ -14,7 +14,7 @@ const Url = sequelize.define(
       type: DataTypes.INTEGER, // or DataTypes.UUID if you're using UUIDs
       allowNull: false,
     },
-    appName: {
+    app_name: {
       type: DataTypes.STRING,
       defaultValue: "",
     },

