@@ -11,14 +11,15 @@ import qrcode from "qrcode";
 import Message from "./models/Message.js";
 import BlockedUserAgent from "./models/blockedAgent.js";
 import sequelize from "./sequelize.js";
-import User from './models/Users.js';
+import User from "./models/Users.js";
 import { Op } from "sequelize";
 
-sequelize.sync({alter:true})
+sequelize
+  .sync({ alter: true })
   .then(() => {
     console.log("All models were synchronized successfully.");
   })
-  .catch(err => {
+  .catch((err) => {
     console.error("Error syncing models:", err);
   });
 
@@ -55,9 +56,9 @@ app.delete("/os-blocker/:id", async (req, res) => {
 const testConnection = async () => {
   try {
     await sequelize.authenticate();
-    console.log('Connection has been established successfully.');
+    console.log("Connection has been established successfully.");
   } catch (error) {
-    console.error('Unable to connect to the database:', error);
+    console.error("Unable to connect to the database:", error);
   }
 };
 
@@ -214,7 +215,6 @@ const io = new SocketServer(server, {
 
 // const userSocketMap = new Map(); // Map to store user-to-socket connections
 
-
 // Real-time chat logic
 // io.on("connection", async(socket) => {
 //   const userId = socket.handshake.query.userId
@@ -228,9 +228,9 @@ const io = new SocketServer(server, {
 //   }
 //   // Listen for new messages and store them in the database
 //   socket.on("chat:message", (messageData) => {
-//     const newMessage = new Message({ 
-//       username: messageData.username, 
-//       content: messageData.content 
+//     const newMessage = new Message({
+//       username: messageData.username,
+//       content: messageData.content
 //     });
 
 //     newMessage.save()
@@ -352,9 +352,8 @@ io.on("connection", async (socket) => {
 });
 
 // Start server
-server.listen(port, () => {
+server.listen(port, "0.0.0.0", () => {
   console.log(`Server running on http://localhost:${port}`);
 });
 
-
-import './models/assosiations.js';
+import "./models/assosiations.js";
