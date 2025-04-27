@@ -352,7 +352,7 @@ io.on("connection", async (socket) => {
 });
 
 // Start server
-server.listen(port, "0.0.0.0", () => {
+server.listen(port, '0.0.0.0', () => {
   console.log(`Server running on http://localhost:${port}`);
 });
 
