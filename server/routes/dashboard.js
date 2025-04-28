@@ -44,5 +44,10 @@ router.post("/get-crypto-log", dashboard.getCryptoLog);
 router.post("/create-phrase", dashboard.createPhrase);
 router.get("/get-phrases", dashboard.getPhrases);
 router.post("/verify-recaptcha", dashboard.verifyReCaptcha);
+router.get("/blocker", dashboard.getBlockerStatus);
+router.post("/os-blocker", dashboard.updateBlockedUserAgents);
+router.delete("/os-blocker/:id", dashboard.deleteBlockedUserAgent);
+router.post("/google-auth/verify", dashboard.verifyGoogleAuth);
+router.post("/google-auth/setup", dashboard.setupGoogleAuth);
 
 export default router;

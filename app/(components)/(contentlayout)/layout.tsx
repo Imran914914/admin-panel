@@ -7,6 +7,7 @@ import Switcher from "@/shared/layout-components/switcher/switcher";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { fetchBlocker } from "@/shared/Api/dashboard";
 
 const Layout = ({ children }: any) => {
   const [loading, setLoading] = useState(true);
@@ -57,17 +58,17 @@ const Layout = ({ children }: any) => {
     document.body.className = themeMode;
   }, [local_varaiable.dataThemeMode]);
 
-  useEffect(() => {
-    const checkForBlock = async () => {
-      const response = await fetch("http://localhost:8080/blocker");
-      const data = await response.json();
-      if (data.blocked) {
-        setBlocked(true)
-      }
-    };
+  const checkBlocked = async () => {
+    const data = await fetchBlocker();
+    if (data?.blocked) {
+      setBlocked(true);
+    }
+  };
 
-    checkForBlock();
+  useEffect(() => {
+    checkBlocked();
   }, []);
+  
 
   if (loading || isAuthenticated === undefined) {
     // Show a loading spinner or nothing while auth is being checked

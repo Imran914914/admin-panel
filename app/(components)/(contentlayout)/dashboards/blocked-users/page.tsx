@@ -5,7 +5,7 @@ import { Button, Card, Col, Row, Pagination, Dropdown } from "react-bootstrap";
 import { SquarePlus, Trash2, Pencil } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import moment from "moment";
-import { deleteIp, getIps } from "@/shared/Api/dashboard";
+import { deleteIp, deleteOSBlocker, fetchBlocker, getIps, updateOSBlocker } from "@/shared/Api/dashboard";
 import Popup from "@/components/Popup";
 import { FaTrash } from "react-icons/fa";
 
@@ -94,16 +94,10 @@ function Page() {
     }
 
     try {
-      const response = await fetch("http://localhost:8080/os-blocker", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ blockedUserAgents: updatedSelected }),
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setBlockedAgents(data.blockedUserAgents);
+      const response = await updateOSBlocker(updatedSelected);
+      if (response?.status===200) {
+        const data = await response?.data;
+        setBlockedAgents(data?.blockedUserAgents);
       }
     } catch (error) {
       console.error("Error updating blocked user agents:", error);
@@ -112,26 +106,22 @@ function Page() {
 
   useEffect(() => {
     const getAllBlockedAgents = async () => {
-      const response = await fetch("http://localhost:8080/blocker");
-      const data = await response.json();
-      setBlockedAgents(data.blockedAgents);
+      const response = await fetchBlocker();
+      setBlockedAgents(response?.blockedAgents);
     };
     getAllBlockedAgents();
   }, [blockedAgents?.length]);
 
   const deleteAgent = async (id: any) => {
     try {
-      const response = await fetch(`http://localhost:8080/os-blocker/${id}`, {
-        method: "DELETE",
-      });
-
-      const data = await response.json();
-      if (response.ok) {
+      const response = await deleteOSBlocker(id);
+      const data = await response?.data;
+      if (response?.status===200) {
         setBlockedAgents((prev: any) =>
-          prev.filter((agent: any) => agent.id !== id)
+          prev.filter((agent: any) => agent?.id !== id)
         );
       } else {
-        console.error(data.error);
+        console.error(data?.error);
       }
     } catch (error) {
       console.error("Failed to delete agent", error);

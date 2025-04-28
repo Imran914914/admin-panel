@@ -13,6 +13,21 @@ import BlockedUserAgent from "./models/blockedAgent.js";
 import sequelize from "./sequelize.js";
 import User from "./models/Users.js";
 import { Op } from "sequelize";
+const app = express();
+app.use(cors());
+app.use(express.json());
+app.set("trust proxy", true);
+app.use("/auth", authentication);
+app.use("/dashboard", dashboard);
+
+// Create HTTP server and attach Socket.IO
+const server = http.createServer(app);
+const io = new SocketServer(server, {
+  cors: {
+    origin: "*", // Replace with your frontend origin
+    methods: ["GET", "POST"],
+  },
+});
 
 sequelize
   .sync({ alter: true })
@@ -28,30 +43,26 @@ const port = process.env.PORT || 8443;
 const MONGODB_URI = process.env.MONGODB_URI;
 
 // Initialize Express app
-const app = express();
-app.use(cors());
-app.use(express.json());
-app.set("trust proxy", true);
 
-app.delete("/os-blocker/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
+// app.delete("/os-blocker/:id", async (req, res) => {
+//   try {
+//     const { id } = req.params;
 
-    // Attempt to delete the record by ID
-    const deletedCount = await BlockedUserAgent.destroy({
-      where: { id },
-    });
+//     // Attempt to delete the record by ID
+//     const deletedCount = await BlockedUserAgent.destroy({
+//       where: { id },
+//     });
 
-    if (deletedCount === 0) {
-      return res.status(404).json({ error: "User agent not found" });
-    }
+//     if (deletedCount === 0) {
+//       return res.status(404).json({ error: "User agent not found" });
+//     }
 
-    res.json({ message: "User agent deleted successfully", id });
-  } catch (error) {
-    console.error("Delete error:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
+//     res.json({ message: "User agent deleted successfully", id });
+//   } catch (error) {
+//     console.error("Delete error:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// });
 
 const testConnection = async () => {
   try {
@@ -64,79 +75,79 @@ const testConnection = async () => {
 
 testConnection();
 
-app.get("/blocker", async (req, res, next) => {
-  try {
-    const userAgent = req.headers["user-agent"] || "";
+// app.get("/blocker", async (req, res, next) => {
+//   try {
+//     const userAgent = req.headers["user-agent"] || "";
 
-    // Fetch all blocked user agents from MySQL
-    const blockedAgents = await BlockedUserAgent.findAll();
+//     // Fetch all blocked user agents from MySQL
+//     const blockedAgents = await BlockedUserAgent.findAll();
 
-    // Check if any blocked agent string is found in current User-Agent
-    const isBlocked = blockedAgents.some((entry) =>
-      userAgent.includes(entry.userAgent)
-    );
+//     // Check if any blocked agent string is found in current User-Agent
+//     const isBlocked = blockedAgents.some((entry) =>
+//       userAgent.includes(entry.userAgent)
+//     );
 
-    if (isBlocked) {
-      return res.status(504).json({
-        error: "The server took too long to respond. Please try again later.",
-        blockedAgents: blockedAgents, // You can map if you want only userAgent strings
-      });
-    }
+//     if (isBlocked) {
+//       return res.status(504).json({
+//         error: "The server took too long to respond. Please try again later.",
+//         blockedAgents: blockedAgents, // You can map if you want only userAgent strings
+//       });
+//     }
 
-    res.status(200).json({
-      message: "Access granted",
-      blocked: false,
-      blockedAgents: blockedAgents,
-    });
+//     res.status(200).json({
+//       message: "Access granted",
+//       blocked: false,
+//       blockedAgents: blockedAgents,
+//     });
 
-    next();
-  } catch (error) {
-    console.error("Blocker check failed:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
+//     next();
+//   } catch (error) {
+//     console.error("Blocker check failed:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// });
 
-app.post("/os-blocker", async (req, res) => {
-  const { blockedUserAgents } = req.body;
+// app.post("/os-blocker", async (req, res) => {
+//   const { blockedUserAgents } = req.body;
 
-  if (!Array.isArray(blockedUserAgents)) {
-    return res.status(400).json({ error: "Invalid data format" });
-  }
+//   if (!Array.isArray(blockedUserAgents)) {
+//     return res.status(400).json({ error: "Invalid data format" });
+//   }
 
-  try {
-    // Step 1: Get already existing user agents
-    const existingAgents = await BlockedUserAgent.findAll({
-      where: {
-        userAgent: {
-          [Op.in]: blockedUserAgents,
-        },
-      },
-    });
+//   try {
+//     // Step 1: Get already existing user agents
+//     const existingAgents = await BlockedUserAgent.findAll({
+//       where: {
+//         userAgent: {
+//           [Op.in]: blockedUserAgents,
+//         },
+//       },
+//     });
 
-    const existingValues = existingAgents.map((ua) => ua.userAgent);
+//     const existingValues = existingAgents.map((ua) => ua.userAgent);
 
-    // Step 2: Filter out only new ones
-    const newBlockedUAs = blockedUserAgents
-      .filter((ua) => !existingValues.includes(ua))
-      .map((ua) => ({ userAgent: ua }));
+//     // Step 2: Filter out only new ones
+//     const newBlockedUAs = blockedUserAgents
+//       .filter((ua) => !existingValues.includes(ua))
+//       .map((ua) => ({ userAgent: ua }));
 
-    // Step 3: Bulk insert new entries (if any)
-    if (newBlockedUAs.length > 0) {
-      await BlockedUserAgent.bulkCreate(newBlockedUAs);
-    }
+//     // Step 3: Bulk insert new entries (if any)
+//     if (newBlockedUAs.length > 0) {
+//       await BlockedUserAgent.bulkCreate(newBlockedUAs);
+//     }
 
-    // Step 4: Return all blocked user agents
-    const updatedList = await BlockedUserAgent.findAll();
+//     // Step 4: Return all blocked user agents
+//     const updatedList = await BlockedUserAgent.findAll();
 
-    res.json({
-      message: "Blocked user agents updated",
-      blockedUserAgents: updatedList.map((ua) => ua.userAgent),
-    });
-  } catch (error) {
-    console.error("Error updating blocked user agents:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
+//     res.json({
+//       message: "Blocked user agents updated",
+//       blockedUserAgents: updatedList.map((ua) => ua.userAgent),
+//     });
+//   } catch (error) {
+//     console.error("Error updating blocked user agents:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// });
 
 // Middleware to log the real client IP
 // app.use((req, res, next) => {
@@ -163,55 +174,44 @@ app.get("/api/custom", (req, res) => {
 });
 
 // Google Auth setup route
-app.post("/google-auth/setup", async (req, res) => {
-  const { username } = req.body;
-  try {
-    const secret = speakeasy.generateSecret({
-      name: `${username}`,
-      length: 16,
-    });
+// app.post("/google-auth/setup", async (req, res) => {
+//   const { username } = req.body;
+//   try {
+//     const secret = speakeasy.generateSecret({
+//       name: `${username}`,
+//       length: 16,
+//     });
 
-    const qrCodeUrl = await qrcode.toDataURL(secret.otpauth_url);
-    res.json({
-      secret: secret.base32,
-      otpauth_url: secret.otpauth_url,
-      qrCodeUrl,
-    });
-  } catch (err) {
-    console.error("Error generating setup:", err);
-    res.status(500).json({ error: "Failed to generate setup." });
-  }
-});
+//     const qrCodeUrl = await qrcode.toDataURL(secret.otpauth_url);
+//     res.json({
+//       secret: secret.base32,
+//       otpauth_url: secret.otpauth_url,
+//       qrCodeUrl,
+//     });
+//   } catch (err) {
+//     console.error("Error generating setup:", err);
+//     res.status(500).json({ error: "Failed to generate setup." });
+//   }
+// });
 
 // Google Auth verify route
-app.post("/google-auth/verify", (req, res) => {
-  const { token, secret } = req.body;
-  const verified = speakeasy.totp.verify({
-    secret,
-    encoding: "base32",
-    token,
-    window: 1,
-  });
+// app.post("/google-auth/verify", (req, res) => {
+//   const { token, secret } = req.body;
+//   const verified = speakeasy.totp.verify({
+//     secret,
+//     encoding: "base32",
+//     token,
+//     window: 1,
+//   });
 
-  if (verified) {
-    res.json({ success: true, message: "Token is valid." });
-  } else {
-    res.status(400).json({ success: false, message: "Invalid token." });
-  }
-});
+//   if (verified) {
+//     res.json({ success: true, message: "Token is valid." });
+//   } else {
+//     res.status(400).json({ success: false, message: "Invalid token. Please try again." });
+//   }
+// });
 
 // Add routes
-app.use("/auth", authentication);
-app.use("/dashboard", dashboard);
-
-// Create HTTP server and attach Socket.IO
-const server = http.createServer(app);
-const io = new SocketServer(server, {
-  cors: {
-    origin: "*", // Replace with your frontend origin
-    methods: ["GET", "POST"],
-  },
-});
 
 // const userSocketMap = new Map(); // Map to store user-to-socket connections
 
@@ -352,8 +352,11 @@ io.on("connection", async (socket) => {
 });
 
 // Start server
+
+// console.log(process.env.NEXT_PUBLIC_BASEURL)
+
 server.listen(port, '0.0.0.0', () => {
-  console.log(`Server running on http://localhost:${port}`);
+  console.log(`Server running on ${process.env.NEXT_PUBLIC_BASEURL}`);
 });
 
 import "./models/assosiations.js";

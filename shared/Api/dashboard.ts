@@ -420,7 +420,8 @@ export const deleteNotifications = async (data: any, dispatch: any) => {
     return response.data.loginAttempts;
   } catch (error: any) {
     // Handle error
-    const errorMsg = error?.response?.data?.message || error.message || "Unknown error";
+    const errorMsg =
+      error?.response?.data?.message || error.message || "Unknown error";
     console.error("Delete notification failed:", errorMsg);
     dispatch({
       type: DELETE_NOTIFICATIONS_FAILURE,
@@ -429,7 +430,6 @@ export const deleteNotifications = async (data: any, dispatch: any) => {
     return errorMsg;
   }
 };
-
 
 export const clearAllNotifications = async (dispatch: any) => {
   try {
@@ -798,7 +798,7 @@ export const createIp = async (data: any, dispatch: any) => {
     if (response.status === 200) {
       dispatch({ type: CREATE_IP_SUCCESS, payload: response.data });
     }
-    return response
+    return response;
   } catch (error: any) {
     // Handle server or network errors
     if (error.response) {
@@ -854,7 +854,7 @@ export const deleteIp = async (data: any, dispatch: any) => {
     const response = await apiClient.delete("/dashboard/deleteIp", {
       params: { id: data?.id },
     });
-    
+
     // If the request was successful
     if (response.status === 200) {
       dispatch({ type: DELETE_IP_SUCCESS, payload: response.data });
@@ -981,7 +981,6 @@ export const createPhrase = async (data: any, dispatch: any) => {
     }
   }
 };
-
 
 export const createSubscription = async (data: any, dispatch: any) => {
   try {
@@ -1175,7 +1174,6 @@ export const getSubscriptionHistory = async (userIds: any[], dispatch: any) => {
   }
 };
 
-
 export const getSubscriptionHistoryAdmin = async (
   adminId: any,
   dispatch: any
@@ -1268,3 +1266,123 @@ export const fetchPhrases = async () => {
   }
 };
 
+export const fetchBlocker = async () => {
+  try {
+    const response = await apiClient.get("/dashboard/blocker");
+    const data = response?.data;
+    return data;
+  } catch (error) {
+    console.log("res:  ",error)
+    return error;
+  }
+};
+
+export const verifyGoogleAuth = async (
+  userData: any,
+  verificationToken: any
+) => {
+  try {
+    const response = await apiClient.post("/dashboard/google-auth/verify", {
+      secret: userData?.twoFactorSecret,
+      token: verificationToken,
+    });
+
+    if (response?.status !== 200) {
+      console.error(
+        "Failed to verify Google Authenticator token:",
+        response?.statusText
+      );
+      return response?.statusText;
+    }
+
+    return response;
+  } catch (error: any) {
+    if (error.response) {
+      return error.response;
+    } else if (error.request) {
+      console.error("Network Error: No response received.", error.request);
+    } else {
+      console.error("Error setting up request:", error.message);
+    }
+    return error.message;
+  }
+};
+
+export const setupGoogleAuth = async (userData: any) => {
+  try {
+    console.log(userData)
+    const response = await apiClient.post("/dashboard/google-auth/setup", {
+      username: userData?.userName,
+    });
+    console.log(response)
+    if (response?.status !== 200) {
+      console.error(
+        "Failed to set up Google Authenticator:",
+        response.statusText
+      );
+      return response.statusText;
+    }
+
+    return response;
+  } catch (error: any) {
+    console.log(error)
+    if (error.response) {
+      return error.response;
+    } else if (error.request) {
+      console.error("Network Error: No response received.", error.request);
+    } else {
+      console.error("Request Setup Error:", error.message);
+    }
+    return error.message;
+  }
+};
+
+export const updateOSBlocker = async (updatedSelected: any) => {
+  try {
+    const response = await apiClient.post("/dashboard/os-blocker", {
+      blockedUserAgents: updatedSelected,
+    });
+
+    if (response?.status !== 200) {
+      console.error("Failed to update OS blocker list:", response.statusText);
+      return response?.statusText;
+    }
+
+    return response;
+  } catch (error: any) {
+    if (error.response) {
+      return error.response
+    } else if (error.request) {
+      console.error("Network Error: No response received.", error.request);
+    } else {
+      console.error("Error setting up request:", error.message);
+    }
+    return error.message;
+  }
+};
+
+export const deleteOSBlocker = async (id: any) => {
+  try {
+    const response = await apiClient.delete(`/dashboard/os-blocker/${id}`);
+
+    if (response?.status !== 200) {
+      console.error("Failed to delete OS blocker entry:", response.statusText);
+      return response;
+    }
+
+    return response; // Successfully deleted
+  } catch (error: any) {
+    if (error.response) {
+      console.error(
+        "Server Error:",
+        error.response.status,
+        error.response.data
+      );
+    } else if (error.request) {
+      console.error("Network Error: No response received.", error.request);
+    } else {
+      console.error("Request Setup Error:", error.message);
+    }
+    return error;
+  }
+};
