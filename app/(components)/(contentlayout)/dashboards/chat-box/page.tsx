@@ -9,8 +9,6 @@ import { fetchUsers, fetchMessages } from "@/shared/Api/dashboard";
 import { Button } from "react-bootstrap";
 import { Smile } from "lucide-react";
 import Pageheader from "@/shared/layout-components/page-header/pageheader";
-
-
 const Chat: React.FC = () => {
   const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState<string>("");
@@ -20,8 +18,7 @@ const Chat: React.FC = () => {
   const [cursorPosition, setCursorPosition] = useState<number>(0);
   const [users, setUsers] = useState<[]>([]);
   const userMessanger = useSelector((state: any) => state?.auth?.user);
-  
-  const socket: Socket = io("http://localhost:8080", {
+  const socket: Socket = io(process.env.NEXT_PUBLIC_BASEURL, {
     query: { userId:userMessanger?.id },
   });
   useEffect(() => {

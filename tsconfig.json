@@ -22,6 +22,6 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "server/routes/authentication.js", "server/routes/authentication.js", "shared/Api/auth.js", "server/models/IpBlock.js"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "server/routes/authentication.js", "server/routes/authentication.js", "shared/Api/auth.js", "server/models/IpBlock.js", "server/config/index.js"],
   "exclude": ["node_modules"]
 }

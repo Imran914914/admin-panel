@@ -104,11 +104,11 @@ function Page() {
     }
   };
 
+  const getAllBlockedAgents = async () => {
+    const response = await fetchBlocker();
+    setBlockedAgents(response?.blockedAgents);
+  };
   useEffect(() => {
-    const getAllBlockedAgents = async () => {
-      const response = await fetchBlocker();
-      setBlockedAgents(response?.blockedAgents);
-    };
     getAllBlockedAgents();
   }, [blockedAgents?.length]);
 
@@ -117,9 +117,7 @@ function Page() {
       const response = await deleteOSBlocker(id);
       const data = await response?.data;
       if (response?.status===200) {
-        setBlockedAgents((prev: any) =>
-          prev.filter((agent: any) => agent?.id !== id)
-        );
+        getAllBlockedAgents();
       } else {
         console.error(data?.error);
       }
@@ -321,9 +319,9 @@ function Page() {
                             className="mr-2"
                             type="checkbox"
                             checked={
-                              selected.includes(page) ||
+                              blockedAgents?.includes(page) ||
                               blockedAgents?.some(
-                                (agent) => agent.userAgent === page
+                                (agent) => agent?.userAgent === page
                               )
                             }
                             onChange={() => {
