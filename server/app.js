@@ -6,6 +6,7 @@ import dashboard from "./routes/dashboard.js";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
+import https from "https";
 import speakeasy from "speakeasy";
 import qrcode from "qrcode";
 import Message from "./models/Message.js";
@@ -20,8 +21,13 @@ app.set("trust proxy", true);
 app.use("/auth", authentication);
 app.use("/dashboard", dashboard);
 
+const privateKey = fs.readFileSync("./certs/server.key", "utf8");
+const certificate = fs.readFileSync("./certs/server.cert", "utf8");
+
+const credentials = { key: privateKey, cert: certificate };
+
 // Create HTTP server and attach Socket.IO
-const server = http.createServer(app);
+const server = https.createServer(credentials, app);
 const io = new SocketServer(server, {
   cors: {
     origin: "*", // Replace with your frontend origin
@@ -355,7 +361,7 @@ io.on("connection", async (socket) => {
 
 // console.log(process.env.NEXT_PUBLIC_BASEURL)
 
-server.listen(port, '0.0.0.0', () => {
+server.listen(port, "0.0.0.0", () => {
   console.log(`Server running on ${process.env.NEXT_PUBLIC_BASEURL}`);
 });
 
