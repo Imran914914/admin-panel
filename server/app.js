@@ -24,7 +24,7 @@ const certificate = fs.readFileSync("./certs/server.cert", "utf8");
 const credentials = { key: privateKey, cert: certificate };
 
 // Create HTTP server and attach Socket.IO
-const server = https.createServer(credentials, app);
+const server = http.createServer(app);
 const io = new SocketServer(server, {
   cors: {
     origin: "*", // Replace with your frontend origin
@@ -33,7 +33,7 @@ const io = new SocketServer(server, {
 });
 
 sequelize
-  .sync({ alter: true })
+  .sync({ alter: false, force: false })
   .then(() => {
     console.log("All models were synchronized successfully.");
   })
@@ -358,7 +358,8 @@ io.on("connection", async (socket) => {
 
 // console.log(process.env.NEXT_PUBLIC_BASEURL)
 
-server.listen(port, "0.0.0.0", () => {
+server.listen(port, () => {
+  console.log(process.env.PORT)
   console.log(`Server running on ${process.env.NEXT_PUBLIC_BASEURL}`);
 });
 
