@@ -24,7 +24,7 @@ const certificate = fs.readFileSync("./certs/server.cert", "utf8");
 const credentials = { key: privateKey, cert: certificate };
 
 // Create HTTP server and attach Socket.IO
-const server = http.createServer(app);
+const server = https.createServer(credentials, app);
 const io = new SocketServer(server, {
   cors: {
     origin: "*", // Replace with your frontend origin
